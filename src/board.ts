@@ -1,0 +1,88 @@
+import { ref } from 'vue';
+export interface Tile {
+  type: 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Pawn' | '';
+  player: 1 | 2 | 0;
+}
+
+export const board = ref<Tile[][]>([
+  [
+    { type: 'Rook', player: 1 },
+    { type: 'Knight', player: 1 },
+    { type: 'Bishop', player: 1 },
+    { type: 'Queen', player: 1 },
+    { type: 'King', player: 1 },
+    { type: 'Bishop', player: 1 },
+    { type: 'Knight', player: 1 },
+    { type: 'Rook', player: 1 },
+  ],
+  [
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+    { type: 'Pawn', player: 1 },
+  ],
+  [
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+  ],
+  [
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+  ],
+  [
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+  ],
+  [
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+    { type: '', player: 0 },
+  ],
+  [
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+    { type: 'Pawn', player: 2 },
+  ],
+  [
+    { type: 'Rook', player: 2 },
+    { type: 'Knight', player: 2 },
+    { type: 'Bishop', player: 2 },
+    { type: 'Queen', player: 2 },
+    { type: 'King', player: 2 },
+    { type: 'Bishop', player: 2 },
+    { type: 'Knight', player: 2 },
+    { type: 'Rook', player: 2 },
+  ],
+]);
