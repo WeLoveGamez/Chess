@@ -9,22 +9,26 @@
           :class="{
             selected: selectedCell[0] === rowIndex && selectedCell[1] === cellIndex,
             legal: legalMoves?.find(c => c[0] == rowIndex && c[1] == cellIndex),
+            whitePiece: board[rowIndex][cellIndex].player == 1,
+            blackPiece: board[rowIndex][cellIndex].player == 2,
+            // checking: [...King2Checked, ...King1Checked].find(p => p[0] == rowIndex && p[1] == cellIndex),
           }"
           @click="cellClicked(rowIndex, cellIndex)"
         >
-          <!-- {{ getUnicodePiece(cell.type, cell.player == 1) }} -->
-          {{ cell }}
+          {{ getUnicodePiece(cell.type) }}
         </div>
       </div>
     </div>
   </div>
+  {{ King1Checked }}{{ King2Checked }}
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
-import { board, Tile } from '../board';
-import { checkLegalMoves } from '../moves';
-const selectedCell = ref([-1, -1]);
+import { board, Tile, applyMove } from '../board';
+import { Position } from '../types';
+import { checkLegalMoves, checkChecks } from '../moves';
+const selectedCell = ref<Position>([-1, -1]);
 const playerTurn = ref(1);
 
 function cellClicked(rowIndex: number, cellIndex: number) {
@@ -45,17 +49,16 @@ function cellClicked(rowIndex: number, cellIndex: number) {
       selectedCell.value = [toRow, toCell];
       return;
     }
-    move(fromRow, fromCell, toRow, toCell);
+    board.value = applyMove(fromRow, fromCell, toRow, toCell, legalMoves.value, board.value);
+    playerTurn.value = playerTurn.value == 1 ? 2 : 1;
+    selectedCell.value = [-1, -1];
   }
 }
-function move(fromRow: number, fromCell: number, toRow: number, toCell: number) {
-  board.value[toRow][toCell] = board.value[fromRow][fromCell];
-  board.value[fromRow][fromCell] = { type: '', player: 0 };
-  playerTurn.value = playerTurn.value == 1 ? 2 : 1;
-  selectedCell.value = [-1, -1];
-}
 
-const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1]));
+const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value));
+
+const King1Checked = computed(() => checkChecks(1, board.value));
+const King2Checked = computed(() => checkChecks(2, board.value));
 
 const UNICODE_PIECES = {
   King: 0x2654,
@@ -65,9 +68,9 @@ const UNICODE_PIECES = {
   Knight: 0x2658,
   Pawn: 0x2659,
 };
-function getUnicodePiece(string: Tile['type'], isBlack: boolean) {
+function getUnicodePiece(string: Tile['type']) {
   if (string == '') return '';
-  return String.fromCharCode(UNICODE_PIECES[string] + (isBlack ? 6 : 0));
+  return String.fromCharCode(UNICODE_PIECES[string] + 6);
 }
 </script>
 <style lang="scss" scoped>
@@ -83,17 +86,16 @@ function getUnicodePiece(string: Tile['type'], isBlack: boolean) {
     width: $size;
     height: $size;
     cursor: pointer;
-    // font-size: 5rem;
+    font-size: 5rem;
+    background-color: gray;
   }
 }
 
 .row:nth-child(odd) .cell:nth-child(even) {
-  background: #000;
-  color: white;
+  background: #854000;
 }
 .row:nth-child(even) .cell:nth-child(odd) {
-  background: #000;
-  color: white;
+  background: #854000;
 }
 .selected {
   box-shadow: inset 0 0 0 2000px rgba(35, 211, 0, 0.5);
@@ -101,5 +103,14 @@ function getUnicodePiece(string: Tile['type'], isBlack: boolean) {
 }
 .legal {
   background-color: aqua !important;
+}
+.whitePiece {
+  color: white;
+}
+.BlackPiece {
+  color: black;
+}
+.checking {
+  background-color: red !important;
 }
 </style>
