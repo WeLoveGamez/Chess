@@ -7,16 +7,14 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
   let kingPosition: Position = [-1, -1];
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[0].length; j++) {
-      if (board[i][j].type == 'King' && board[i][j].player == player) kingPosition = [i, j];
+      if (board[i][j]?.type == 'King' && board[i][j].player == player) kingPosition = [i, j];
     }
   }
 
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[0].length; j++) {
       const legalMoves: Position[] = [];
-      console.log(i, j);
-      console.log(board[i][j]);
-      // if (board[i][j].player && board[i][j].player != player) legalMoves.push(...checkLegalMoves(i, j, board)); //FIXME:
+      if (board[i][j].player && board[i][j].player != player) legalMoves.push(...checkLegalMoves(i, j, board, false)); //FIXME:
       if (legalMoves.find(m => m[0] == kingPosition[0] && m[1] == kingPosition[1])) {
         checkingPieces.push([i, j]);
       }
@@ -25,9 +23,9 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
   return checkingPieces;
 }
 
-export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][]): Position[] {
+export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][], checkIllegalMoves: boolean): Position[] {
   if (fromRow == -1 || fromCell == -1) return [];
-  const legalMoves: Position[] = [];
+  let legalMoves: Position[] = [];
   const tile = board[fromRow][fromCell];
   const piece = tile.type;
   const player = tile.player;
@@ -50,8 +48,7 @@ export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[]
   if (piece.includes('Pawn')) {
     legalMoves.push(...checkLegalMovesPawn(fromRow, fromCell, player, board));
   }
-
-  // if (player) removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
+  if (player && checkIllegalMoves) legalMoves = removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
   return legalMoves;
 }
 
@@ -203,9 +200,14 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
   return legalMoves;
 }
 
-// function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 | 2, fromRow: number, fromCell: number) {
-//   const checks: Position[] = [];
-//   for (let action of legalMoves) {
-//     checks.push(...checkChecks(player, applyMove(fromRow, fromCell, action[0], action[1], legalMoves, board)));
-//   }
-// }
+function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 | 2, fromRow: number, fromCell: number): Position[] {
+  const checks: Position[] = [];
+  if (!board[fromRow][fromCell].type) return [];
+  for (let action of legalMoves) {
+    if (checkChecks(player, applyMove(fromRow, fromCell, action[0], action[1], legalMoves, board)).length > 0) {
+      checks.push(action);
+    }
+  }
+  console.log({ checks });
+  return legalMoves.filter(m => !checks.find(c => c[0] == m[0] && c[1] == m[1]));
+}

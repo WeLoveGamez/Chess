@@ -1,26 +1,33 @@
 <template>
-  <div @mousedown.self="selectedCell = [-1, -1]" style="width: 100%; height: 100vh">
-    <div class="board">
-      {{ selectedCell }}{{ playerTurn }}
-      <div class="row" v-for="(row, rowIndex) in board">
-        <div
-          class="cell"
-          v-for="(cell, cellIndex) in row"
-          :class="{
-            selected: selectedCell[0] === rowIndex && selectedCell[1] === cellIndex,
-            legal: legalMoves?.find(c => c[0] == rowIndex && c[1] == cellIndex),
-            whitePiece: board[rowIndex][cellIndex].player == 1,
-            blackPiece: board[rowIndex][cellIndex].player == 2,
-            // checking: [...King2Checked, ...King1Checked].find(p => p[0] == rowIndex && p[1] == cellIndex),
-          }"
-          @click="cellClicked(rowIndex, cellIndex)"
-        >
-          {{ getUnicodePiece(cell.type) }}
+  <main @mousedown.self="selectedCell = [-1, -1]">
+    <div>
+      <div class="board">
+        <div class="row" v-for="(row, rowIndex) in board">
+          <div
+            class="cell"
+            v-for="(cell, cellIndex) in row"
+            :class="{
+              selected: selectedCell[0] === rowIndex && selectedCell[1] === cellIndex,
+              legal: legalMoves?.find(c => c[0] == rowIndex && c[1] == cellIndex),
+              whitePiece: board[rowIndex][cellIndex].player == 1,
+              blackPiece: board[rowIndex][cellIndex].player == 2,
+              checking: [...King2Checked, ...King1Checked].find(p => p[0] == rowIndex && p[1] == cellIndex),
+            }"
+            @click.stop="cellClicked(rowIndex, cellIndex)"
+          >
+            {{ getUnicodePiece(cell.type) }}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  {{ King1Checked }}{{ King2Checked }}
+    <aside>
+      <div>Player: {{ playerTurn }}</div>
+      <div>selectedCell:{{ selectedCell }}</div>
+      <div>WhiteChecked:{{ King1Checked }}</div>
+      <div>BlackChecked:{{ King2Checked }}</div>
+      <div>LagalMoves:{{ legalMoves }}</div>
+    </aside>
+  </main>
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
@@ -55,7 +62,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
   }
 }
 
-const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value));
+const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
 
 const King1Checked = computed(() => checkChecks(1, board.value));
 const King2Checked = computed(() => checkChecks(2, board.value));
@@ -74,21 +81,29 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-.row {
-  $size: 11vh;
-  display: grid;
-  grid-template-columns: repeat(8, minmax($size, 1fr));
-  .cell {
-    border: 1px solid #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: $size;
-    height: $size;
-    cursor: pointer;
-    font-size: 5rem;
-    background-color: gray;
+.board {
+  width: min-content;
+  .row {
+    $size: 11vh;
+    display: grid;
+    grid-template-columns: repeat(8, $size);
+
+    .cell {
+      border: 1px solid #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: $size;
+      height: $size;
+      cursor: pointer;
+      font-size: 5rem;
+      background-color: gray;
+    }
   }
+}
+
+aside * {
+  margin: 20px;
 }
 
 .row:nth-child(odd) .cell:nth-child(even) {
@@ -112,5 +127,8 @@ function getUnicodePiece(string: Tile['type']) {
 }
 .checking {
   background-color: red !important;
+}
+main {
+  display: flex;
 }
 </style>
