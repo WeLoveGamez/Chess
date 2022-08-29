@@ -5,4 +5,8 @@
 import Board from './components/Board.vue';
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss">
+html:root {
+  --bs-body-font-family: arial;
+}
+</style>

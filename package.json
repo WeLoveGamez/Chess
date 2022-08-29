@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.6",
+    "bootstrap": "^5.2.0",
+    "custom-mbd-components": "github:MBD-Team/customMBDComponents",
     "sass": "^1.54.5",
     "vue": "^3.2.37"
   },
