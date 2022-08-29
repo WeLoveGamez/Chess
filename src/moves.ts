@@ -90,7 +90,6 @@ function checkLegalMovesPawn(fromRow: number, fromCell: number, player: 1 | 2 | 
   if (fromRow == (player == 1 ? 4 : 3)) {
     if (board[fromRow][fromCell - 1]?.type == 'Pawn' || board[fromRow][fromCell + 1]?.type == 'Pawn') {
       if (moveHistory.value.at(-1)?.to[0] == fromRow && moveHistory.value.at(-1)?.from[0] == fromRow + 2 * playerOffset) {
-        console.log('en passant');
         legalMoves.push([fromRow + playerOffset, moveHistory.value.at(-1)!.to[1]]);
       }
     }
@@ -215,7 +214,6 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
     }
     legalMoves.push([fromRow + rowOffset, fromCell + cellOffset]);
   }
-  // console.log(King2Checked.value?.length);
   //große Rochade schwarz
   if (
     player == 2 &&
@@ -280,6 +278,5 @@ function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 |
       checks.push(action);
     }
   }
-  console.log({ checks });
   return legalMoves.filter(m => !checks.find(c => c[0] == m[0] && c[1] == m[1]));
 }

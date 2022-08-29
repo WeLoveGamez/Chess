@@ -56,14 +56,14 @@
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
-import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES } from '../board';
+import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, getPieceValue } from '../board';
 import { Position } from '../types';
 import { checkLegalMoves, checkAllLegalMoves } from '../moves';
 import { Button } from 'custom-mbd-components';
 const selectedCell = ref<Position>([-1, -1]);
 const playerTurn = ref<1 | 2>(1);
 const bot = ref(true);
-const botPlayer = ref(2);
+const botPlayer = ref<1 | 2>(2);
 
 function cellClicked(rowIndex: number, cellIndex: number) {
   if (openPromotePawnSelect.value) return;
@@ -91,37 +91,65 @@ function cellClicked(rowIndex: number, cellIndex: number) {
   }
 }
 function botMove() {
-  let position = getGoodBotMove(moveableBotPieces.value)[Math.floor(Math.random() * getGoodBotMove(moveableBotPieces.value).length)];
-  selectedCell.value = position.piece;
-  let move = getGoodBotMove(moveableBotPieces.value);
-  board.value = applyMove(
-    position.piece[0],
-    position.piece[1],
-    move[0].targets[0][0],
-    move[0].targets[0][1],
-    legalMoves.value,
-    board.value,
-    playerTurn,
-    selectedCell,
-    moveHistory
-  );
+  if (openPromotePawnSelect.value) return;
+  if (getGoodBotMove(moveableBotPieces.value)?.length) {
+    let position = getGoodBotMove(moveableBotPieces.value)[Math.floor(Math.random() * getGoodBotMove(moveableBotPieces.value).length)];
+    selectedCell.value = position.piece;
+    let move = getGoodBotMove(moveableBotPieces.value);
+    board.value = applyMove(
+      position.piece[0],
+      position.piece[1],
+      move[0].targets[0][0],
+      move[0].targets[0][1],
+      legalMoves.value,
+      board.value,
+      playerTurn,
+      selectedCell,
+      moveHistory
+    );
+  } else {
+    let position = moveableBotPieces.value[Math.floor(Math.random() * moveableBotPieces.value.length)];
+    selectedCell.value = position;
+    const legalBotMoves = checkLegalMoves(position[0], position[1], board.value, true);
+    let move = legalBotMoves[Math.floor(Math.random() * legalBotMoves.length)];
+    board.value = applyMove(position[0], position[1], move[0], move[1], legalMoves.value, board.value, playerTurn, selectedCell, moveHistory);
+  }
+  if (openPromotePawnSelect.value) {
+    choosePromotionPiece('Queen');
+  }
 }
 
 function getGoodBotMove(moveableBotPieces: Position[]) {
-  let move: { piece: Position; targets: Position[] }[] = [];
-  // return checkLegalMoves(position[0], position[1], board.value, true)[
-  //   Math.floor(Math.random() * checkLegalMoves(position[0], position[1], board.value, true).length)
-  // ];
+  let moves: { piece: Position; targets: Position[] }[] = [];
+
+  // kill rnd piece
   for (let position of moveableBotPieces) {
     let targets = checkLegalMoves(position[0], position[1], board.value, true).filter(m => board.value[m[0]][m[1]].type);
-    move.push({ piece: position, targets: targets });
+    moves.push({ piece: position, targets: targets });
   }
-  move = move.filter(m => m.targets.length != 0);
-
-  if (move.length == 0) {
+  moves = moves.filter(m => m.targets.length != 0);
+  // filter for free pieces
+  let enemyMoves: Position[] = [];
+  for (let move of moves) {
+    for (let target of move.targets) {
+      enemyMoves.push(
+        ...checkAllLegalMoves(
+          applyMove(
+            move.piece[0],
+            move.piece[1],
+            target[0],
+            target[1],
+            checkLegalMoves(move.piece[0], move.piece[1], board.value, true),
+            board.value
+          ),
+          botPlayer.value == 1 ? 2 : 1
+        )
+      );
+      move.targets = move.targets.filter(t => !enemyMoves.find(m => t[0] == m[0] && t[1] == m[1]));
+    }
   }
-
-  return move;
+  moves = moves.filter(m => m.targets.length != 0);
+  return moves;
 
   // take queen
   // take blunders
@@ -134,6 +162,9 @@ function getGoodBotMove(moveableBotPieces: Position[]) {
 function choosePromotionPiece(piece: Tile['type']) {
   if (!openPromotePawnSelect.value) return;
   board.value[openPromotePawnSelect.value[0]][openPromotePawnSelect.value[1]].type = piece;
+  if (botPlayer.value == playerTurn.value) {
+    botMove();
+  }
 }
 function getMoveableBotPieces(botPlayer: number) {
   let pieces: Position[] = [];

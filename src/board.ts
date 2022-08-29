@@ -93,6 +93,21 @@ export const board = ref<Tile[][]>([
     { type: 'Rook', player: 2 },
   ],
 ]);
+export function getPieceValue(piece: Tile['type']) {
+  switch (piece) {
+    case 'Bishop':
+    case 'Knight':
+      return 3;
+    case 'Pawn':
+      return 1;
+    case 'Queen':
+      return 9;
+    case 'Rook':
+      return 5;
+    case 'King':
+      return 3.5;
+  }
+}
 
 export function applyMove(
   fromRow: number,
