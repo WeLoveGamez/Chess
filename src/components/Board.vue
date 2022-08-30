@@ -21,7 +21,7 @@
         </div>
       </div>
     </div>
-    <aside>
+    <aside v-if="false">
       <div>
         <span class="text-center">Play vs Bot:</span>
         <Button @click="bot = !bot">{{ bot }}</Button>
@@ -46,12 +46,12 @@
       </div>
     </aside>
   </main>
-  <div class="letters">
+  <!-- <div class="letters">
     <div v-for="letter in 'abcdefgh'">{{ letter }}</div>
   </div>
   <div class="numbers">
     <div v-for="number in '87654321'">{{ number }}</div>
-  </div>
+  </div> -->
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
@@ -214,13 +214,12 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-$size: 11vh;
+$size: 12vw;
 .board {
-  width: min-content;
   transform: rotateX(180deg);
   .row {
     display: grid;
-    grid-template-columns: repeat(8, $size);
+    grid-template-columns: repeat(8, auto);
 
     .cell {
       border: 1px solid #000;
@@ -230,7 +229,7 @@ $size: 11vh;
       width: $size;
       height: $size;
       cursor: pointer;
-      font-size: 5rem;
+      font-size: 2.5rem;
       background-color: gray;
       transform: rotateX(180deg);
     }
@@ -283,7 +282,7 @@ main {
   top: calc($size * 8 - 20px);
   left: calc($size - 8px);
   display: flex;
-
+  width: min-content;
   * {
     width: calc($size);
     font-size: 20px;
