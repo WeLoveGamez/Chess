@@ -20,7 +20,7 @@ export default defineConfig({
         theme_color: '#7E1F86',
         name: 'autoCheese',
         short_name: 'autoCheese',
-        start_url: '/autoCheese',
+        start_url: '/Chess',
         display: 'standalone',
         icons: [
           {
