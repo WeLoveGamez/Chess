@@ -1,7 +1,7 @@
 <template>
-  <main class="container" @click="selectedCell = [-1, -1]">
+  <main class="container flex-column" @click="selectedCell = [-1, -1]">
     <div>
-      <div class="board">
+      <div class="board flex-row">
         <div class="row" v-for="(row, rowIndex) in board">
           <div
             class="cell"
@@ -21,11 +21,12 @@
         </div>
       </div>
     </div>
-    <aside v-if="false">
+    <aside>
       <div>
         <span class="text-center">Play vs Bot:</span>
         <Button @click="bot = !bot">{{ bot }}</Button>
       </div>
+
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
       <!-- <div>selectedCell:{{ selectedCell }}</div>
           <div>WhiteChecked:{{ King1Checked }}</div>
@@ -215,12 +216,13 @@ function getUnicodePiece(string: Tile['type']) {
 </script>
 <style lang="scss" scoped>
 $size: 12vw;
+
 .board {
   transform: rotateX(180deg);
+
   .row {
     display: grid;
     grid-template-columns: repeat(8, auto);
-
     .cell {
       border: 1px solid #000;
       display: flex;
