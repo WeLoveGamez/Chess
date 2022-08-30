@@ -1,1 +1,1 @@
-{"name":"chess","short_name":"chess","start_url":"./","display":"standalone","background_color":"#ffffff","lang":"en","scope":"./"}
+{"name":"autoCheese","short_name":"autoCheese","start_url":"/autoCheese","display":"standalone","background_color":"#000000","lang":"en","scope":"./","theme_color":"#7E1F86"}
