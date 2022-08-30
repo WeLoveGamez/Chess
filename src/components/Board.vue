@@ -1,6 +1,5 @@
 <template>
   <main class="container" @click="selectedCell = [-1, -1]">
-    <img src="../../docs/public/img/icons/android-chrome-192x192.png" alt="" />
     <div>
       <div class="board">
         <div class="row" v-for="(row, rowIndex) in board">

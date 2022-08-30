@@ -22,14 +22,14 @@ export default defineConfig({
         short_name: 'autoCheese',
         start_url: '/autoCheese',
         display: 'standalone',
-        // icons: [
-        //   {
-        //     src: "/autoCheese/assets/cheese.1670ace1.png",
-        //     sizes: "144x144",
-        //     type: "image/png",
-        //     purpose: "any",
-        //   },
-        // ],
+        icons: [
+          {
+            src: '/Chess/assets/android-chrome-192x192.58efdd54.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any',
+          },
+        ],
       },
     }),
   ],
