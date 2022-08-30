@@ -20,11 +20,11 @@ export default defineConfig({
         theme_color: '#7E1F86',
         name: 'autoCheese',
         short_name: 'autoCheese',
-        start_url: '/Chess',
+        start_url: '/Chess/',
         display: 'standalone',
         icons: [
           {
-            src: '/Chess/assets/android-chrome-192x192.58efdd54.png',
+            src: '/Chess/img/icons/msapplication-icon-144x144.png',
             sizes: '144x144',
             type: 'image/png',
             purpose: 'any',
