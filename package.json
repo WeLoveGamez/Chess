@@ -1,17 +1,17 @@
 {
   "name": "chess",
-  "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
     "preview": "vite preview"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.0",
     "custom-mbd-components": "github:MBD-Team/customMBDComponents",
+    "register-service-worker": "^1.7.1",
     "sass": "^1.54.5",
     "vue": "^3.2.37",
     "vue-router": "^4.1.5"
@@ -23,5 +23,6 @@
     "vite": "^3.0.7",
     "vite-plugin-pwa": "^0.12.3",
     "vue-tsc": "^0.39.5"
-  }
+  },
+  "type": "module"
 }
