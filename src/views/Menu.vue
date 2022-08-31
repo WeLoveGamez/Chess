@@ -10,8 +10,26 @@
     <div class="mt-3">
       <Modal title="lineup">
         <div class="container">
-          <div>available figures</div>
-          <div>current lineup</div>
+          <div class="d-flex">
+            <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
+              {{ `${unit.name}: ${availableNumber(unit)}` }}
+            </div>
+          </div>
+          <div>
+            {{ selectedUnit || 'no selected unit' }}
+          </div>
+          <div class="lineup">
+            <div class="d-flex">
+              <button v-for="(piece, index) of player.lineup.frontline" class="frontline" @click="clickLineup('frontline', index)">
+                {{ piece }}
+              </button>
+            </div>
+            <div class="d-flex">
+              <button v-for="(piece, index) of player.lineup.backline" class="backline" @click="clickLineup('backline', index)">
+                {{ piece }}
+              </button>
+            </div>
+          </div>
         </div>
         <template #button>
           <div class="cellButton"><Button>Lineup</Button></div>
@@ -53,11 +71,33 @@ import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
 import { player } from '../Player';
 import router from '../router';
+import * as type from '../types';
 
+const selectedUnit = ref('' as type.UnitNames);
 function play() {
   router.push({ name: 'Board' });
 }
-console.log(player.value);
+function availableNumber(unit: type.Unit) {
+  let i = 0;
+  for (let name of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
+    if (name == unit.name) i++;
+  }
+  return unit.amount - i;
+}
+function clickLineup(line: 'frontline' | 'backline', index: number) {
+  if (selectedUnit.value) {
+    addToLineup(line, index);
+  } else {
+    removeFromLineup(line, index);
+  }
+}
+function removeFromLineup(line: 'frontline' | 'backline', index: number) {
+  player.value.lineup[line][index] = '';
+}
+function addToLineup(line: 'frontline' | 'backline', index: number) {
+  player.value.lineup[line][index] = selectedUnit.value;
+  selectedUnit.value = '';
+}
 </script>
 <style lang="scss" scoped>
 $size: 20vw;
@@ -79,9 +119,18 @@ $size: 20vw;
     }
   }
 }
+.frontline,
+.backline {
+  background-color: gray;
+  width: $size;
+  height: $size;
+  border: 1px solid black;
+}
+.lineup :nth-child(odd).frontline,
 .row:nth-child(odd) .cell:nth-child(even) {
   background: #854000;
 }
+.lineup :nth-child(even).backline,
 .row:nth-child(even) .cell:nth-child(odd) {
   background: #854000;
 }

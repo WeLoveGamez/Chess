@@ -6,7 +6,7 @@ export interface Player {
   units: Unit[];
   lineup: Lineup;
 }
-export type UnitNames = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn';
+export type UnitNames = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn' | '';
 
 export interface Unit {
   name: UnitNames;

@@ -7,7 +7,10 @@ if (!player.value) {
     exp: 0,
     money: 0,
     lvl: 1,
-    units: [],
-    lineup: { frontline: [], backline: [] },
+    units: [
+      { name: 'Pawn', value: 1, maxAmount: 3, amount: 3, amountPerRound: 3 },
+      { name: 'King', value: 3.5, maxAmount: 1, amount: 1, amountPerRound: 1 },
+    ],
+    lineup: { frontline: ['', 'Pawn', ''], backline: ['Pawn', 'King', 'Pawn'] },
   };
 }
