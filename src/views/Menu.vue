@@ -82,7 +82,7 @@ import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
 
-const selectedUnit = ref('' as type.UnitNames);
+const selectedUnit = ref<type.UnitName>('');
 function save() {
   if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
 }
@@ -110,7 +110,7 @@ function addToLineup(line: 'frontline' | 'backline', index: number) {
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
 }
-function getUnit(row: number, cell: number): type.UnitNames | 'coming soon' {
+function getUnit(row: number, cell: number): type.UnitName | 'coming soon' {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';
   return 'coming soon';

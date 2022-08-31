@@ -6,16 +6,16 @@ export interface Player {
   units: Unit[];
   lineup: Lineup;
 }
-export type UnitNames = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn' | '';
+export type UnitName = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn' | '';
 
 export interface Unit {
-  name: UnitNames;
+  name: UnitName;
   amount: number;
   maxAmount: number;
   amountPerRound: number;
   value: number;
 }
 export interface Lineup {
-  frontline: UnitNames[];
-  backline: UnitNames[];
+  frontline: UnitName[];
+  backline: UnitName[];
 }
