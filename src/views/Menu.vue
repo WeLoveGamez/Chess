@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <!-- FIXME: add variablen -->
-    <div class="text-center">lvl: Pi</div>
+    <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
     <div class="mt-1">
       <!-- FIXME: add variablen -->
-      <ProgressBar :progress="20" :max-value="100"></ProgressBar>
+      <ProgressBar :progress="player.exp" :max-value="player.lvl * 50"></ProgressBar>
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
     <div class="mt-3">
@@ -51,11 +51,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
+import { player } from '../Player';
 import router from '../router';
 
 function play() {
   router.push({ name: 'Board' });
 }
+console.log(player.value);
 </script>
 <style lang="scss" scoped>
 $size: 20vw;
