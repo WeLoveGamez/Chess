@@ -87,45 +87,48 @@ function cellClicked(rowIndex: number, cellIndex: number) {
     }
     board.value = applyMove(fromRow, fromCell, toRow, toCell, legalMoves.value, board.value, playerTurn, selectedCell, moveHistory);
     if (bot && playerTurn.value == botPlayer.value && !checkMate.value) {
-      botMove();
+      setTimeout(botMove, 500);
     }
   }
 }
 function botMove() {
   if (openPromotePawnSelect.value) return;
-  if (getGoodBotMove(moveableBotPieces.value)?.length) {
-    let position = getGoodBotMove(moveableBotPieces.value)[Math.floor(Math.random() * getGoodBotMove(moveableBotPieces.value).length)];
-    selectedCell.value = position.piece;
-    let move = getGoodBotMove(moveableBotPieces.value);
-    board.value = applyMove(
-      position.piece[0],
-      position.piece[1],
-      move[0].targets[0][0],
-      move[0].targets[0][1],
-      legalMoves.value,
-      board.value,
-      playerTurn,
-      selectedCell,
-      moveHistory
-    );
-  } else {
-    let position = moveableBotPieces.value[Math.floor(Math.random() * moveableBotPieces.value.length)];
-    selectedCell.value = position;
-    const legalBotMoves = checkLegalMoves(position[0], position[1], board.value, true);
-    let move = legalBotMoves[Math.floor(Math.random() * legalBotMoves.length)];
-    board.value = applyMove(position[0], position[1], move[0], move[1], legalMoves.value, board.value, playerTurn, selectedCell, moveHistory);
-  }
+  let move = getGoodBotMove(moveableBotPieces.value);
+  selectedCell.value = move.piece;
+  board.value = applyMove(
+    move.piece[0],
+    move.piece[1],
+    move.target[0],
+    move.target[1],
+    legalMoves.value,
+    board.value,
+    playerTurn,
+    selectedCell,
+    moveHistory
+  );
   if (openPromotePawnSelect.value) {
     choosePromotionPiece('Queen');
   }
 }
-
 function getGoodBotMove(moveableBotPieces: Position[]) {
-  let moves: { piece: Position; targets: Position[] }[] = [];
-  let freePieces: { piece: Position; targets: Position[] }[] = [];
+  type Move = { piece: Position; targets: Position[] };
+  type ReturnMove = { piece: Position; target: Position };
+  let returnMove: ReturnMove | null = null;
+
+  let takeBlunders: Move[] = [];
+
+  let targetablePieces: Move[] = [];
+  //get targetable Pieces
+  for (let position of moveableBotPieces) {
+    let targets = checkLegalMoves(position[0], position[1], board.value, true).filter(m => board.value[m[0]][m[1]].type);
+    targetablePieces.push({ piece: position, targets: targets });
+  }
+  targetablePieces = targetablePieces.filter(m => m.targets.length != 0);
+
   // filter for free pieces
+  takeBlunders = [...targetablePieces];
   let enemyMoves: Position[] = [];
-  for (let move of freePieces) {
+  for (let move of takeBlunders) {
     for (let target of move.targets) {
       enemyMoves.push(
         ...checkAllLegalMoves(
@@ -143,22 +146,59 @@ function getGoodBotMove(moveableBotPieces: Position[]) {
       move.targets = move.targets.filter(t => !enemyMoves.find(m => t[0] == m[0] && t[1] == m[1]));
     }
   }
-  freePieces = freePieces.filter(m => m.targets.length != 0);
- 
+  takeBlunders.filter(m => m.targets.length > 0);
+
   //take queen if possible
-  let takeQueen:{ piece: Position; targets: Position[] }[] = [];
+  let QueenTakes: Move[] = [];
+  for (let position of moveableBotPieces) {
+    let targets = checkLegalMoves(position[0], position[1], board.value, true).filter(m => board.value[m[0]][m[1]].type == 'Queen');
+    if (targets.length) QueenTakes.push({ piece: position, targets: targets });
+  }
 
+  //checkmate if possible
+  let checkmate = {} as ReturnMove;
+  for (let piece of moveableBotPieces) {
+    for (let target of checkLegalMoves(piece[0], piece[1], board.value, true)) {
+      if (
+        checkAllLegalMoves(
+          applyMove(piece[0], piece[1], target[0], target[1], checkLegalMoves(piece[0], piece[1], board.value, true), board.value),
+          botPlayer.value == 1 ? 2 : 1
+        ).length == 0
+      ) {
+        checkmate = { piece, target };
+      }
+    }
+  }
 
-
-  // take queen
-  // take blunders
   // prevent blunders
   // castle
   // develop
   // trade horses and bishops
   // move towards enemy king
-  if(freePieces.length > 0)moves = freePieces
-  return moves;
+
+  if (checkmate.piece && checkmate.target) {
+    returnMove = checkmate;
+    console.log('checkmate');
+  } else if (QueenTakes.length) {
+    let position = QueenTakes.map(m => m.piece).sort(
+      (a, b) => getPieceValue(board.value[a[0]][a[1]].type) - getPieceValue(board.value[b[0]][b[1]].type)
+    )[0];
+    let target = QueenTakes.find(m => m.piece[0] == position[0] && m.piece[1] == position[1])!.targets[0];
+    returnMove = { piece: position, target };
+    console.log('takeQueen');
+  } else if (takeBlunders.length && takeBlunders[0].targets[0]) {
+    returnMove = { piece: takeBlunders[0].piece, target: takeBlunders[0].targets[0] };
+    console.log('takeBlunder', takeBlunders);
+  }
+  //get random move if nothing else works //TODO: update the if for every prio above
+  else {
+    let position = moveableBotPieces[Math.floor(Math.random() * moveableBotPieces.length)];
+    let legalBotMoves = checkLegalMoves(position[0], position[1], board.value, true);
+    let target = legalBotMoves[Math.floor(Math.random() * legalBotMoves.length)];
+    returnMove = { piece: position, target: target };
+    console.log('RandomMove');
+  }
+  return returnMove;
 }
 function choosePromotionPiece(piece: Tile['type']) {
   if (!openPromotePawnSelect.value) return;
@@ -233,10 +273,9 @@ $size: 12vw;
       cursor: pointer;
       background-color: gray;
       transform: rotateX(180deg);
-      font-size:5rem;
-      @media (max-width:1000px){
+      font-size: 5rem;
+      @media (max-width: 1000px) {
         font-size: 2.5rem;
-
       }
     }
   }
