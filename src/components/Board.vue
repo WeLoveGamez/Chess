@@ -122,16 +122,10 @@ function botMove() {
 
 function getGoodBotMove(moveableBotPieces: Position[]) {
   let moves: { piece: Position; targets: Position[] }[] = [];
-
-  // kill rnd piece
-  for (let position of moveableBotPieces) {
-    let targets = checkLegalMoves(position[0], position[1], board.value, true).filter(m => board.value[m[0]][m[1]].type);
-    moves.push({ piece: position, targets: targets });
-  }
-  moves = moves.filter(m => m.targets.length != 0);
+  let freePieces: { piece: Position; targets: Position[] }[] = [];
   // filter for free pieces
   let enemyMoves: Position[] = [];
-  for (let move of moves) {
+  for (let move of freePieces) {
     for (let target of move.targets) {
       enemyMoves.push(
         ...checkAllLegalMoves(
@@ -149,8 +143,12 @@ function getGoodBotMove(moveableBotPieces: Position[]) {
       move.targets = move.targets.filter(t => !enemyMoves.find(m => t[0] == m[0] && t[1] == m[1]));
     }
   }
-  moves = moves.filter(m => m.targets.length != 0);
-  return moves;
+  freePieces = freePieces.filter(m => m.targets.length != 0);
+ 
+  //take queen if possible
+  let takeQueen:{ piece: Position; targets: Position[] }[] = [];
+
+
 
   // take queen
   // take blunders
@@ -159,6 +157,8 @@ function getGoodBotMove(moveableBotPieces: Position[]) {
   // develop
   // trade horses and bishops
   // move towards enemy king
+  if(freePieces.length > 0)moves = freePieces
+  return moves;
 }
 function choosePromotionPiece(piece: Tile['type']) {
   if (!openPromotePawnSelect.value) return;
