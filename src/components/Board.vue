@@ -231,9 +231,13 @@ $size: 12vw;
       width: $size;
       height: $size;
       cursor: pointer;
-      font-size: 2.5rem;
       background-color: gray;
       transform: rotateX(180deg);
+      font-size:5rem;
+      @media (max-width:1000px){
+        font-size: 2.5rem;
+
+      }
     }
   }
 }
@@ -270,28 +274,28 @@ main {
   margin: 8px;
 }
 
-.numbers {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  * {
-    height: $size;
-    font-size: 20px;
-  }
-}
-.letters {
-  position: absolute;
-  top: calc($size * 8 - 20px);
-  left: calc($size - 8px);
-  display: flex;
-  width: min-content;
-  * {
-    width: calc($size);
-    font-size: 20px;
-  }
-}
+// .numbers {
+//   position: absolute;
+//   top: 10px;
+//   left: 10px;
+//   * {
+//     height: $size;
+//     font-size: 20px;
+//   }
+// }
+// .letters {
+//   position: absolute;
+//   top: calc($size * 8 - 20px);
+//   left: calc($size - 8px);
+//   display: flex;
+//   width: min-content;
+//   * {
+//     width: calc($size);
+//     font-size: 20px;
+//   }
+// }
 .promotions {
-  font-size: 5rem;
+  font-size: 2.5rem;
   background-color: black;
   color: white;
   display: flex;
