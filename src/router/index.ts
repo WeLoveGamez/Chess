@@ -1,4 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import Menu from '../views/Menu.vue';
+import Board from '../components/Board.vue';
 declare module 'vue-router' {
   interface RouteMeta {
     guard: 'auth' | 'guest';
@@ -6,14 +8,16 @@ declare module 'vue-router' {
 }
 
 const routes: Array<RouteRecordRaw> = [
-  //   {
-  //     path: '/',
-  //     name: 'Login',
-  //     component: Login,
-  //     meta: {
-  //       guard: 'guest',
-  //     },
-  //   },
+  {
+    path: '/',
+    name: 'Menu',
+    component: Menu,
+  },
+  {
+    path: '/Board',
+    name: 'Board',
+    component: Board,
+  },
 ];
 const router = createRouter({
   history: createWebHashHistory(),
