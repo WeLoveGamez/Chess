@@ -107,6 +107,7 @@ export function getPieceValue(piece: Tile['type']) {
     case 'King':
       return 3.5;
   }
+  return 0;
 }
 
 export function applyMove(
