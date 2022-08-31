@@ -8,7 +8,7 @@
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
     <div class="mt-3">
-      <Modal title="lineup">
+      <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
         <div class="container">
           <div class="d-flex">
             <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
@@ -36,20 +36,23 @@
         </template>
       </Modal>
     </div>
-    <div class="mt-3">
+    <div class="text-center mt-3">
+      {{ `money: ${player.money}` }}
+    </div>
+    <div class="mt-1">
       <div class="row" v-for="row of 5">
         <div class="cell" v-for="cell of 5">
           <!-- FIXME: add variablen -->
-          <Modal title="test">
-            <div class="container">
-              <div>max amount: Pi</div>
+          <Modal :title="getUnit(row, cell)">
+            <div class="container" v-if="getUnit(row, cell) != 'coming soon'">
+              <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.amount}` }}</div>
               <div>
                 <Button>
                   <div>increase</div>
                   <div>costs: Pi</div>
                 </Button>
               </div>
-              <div>new units per round: Pi</div>
+              <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
               <div>
                 <Button>
                   <div>increase</div>
@@ -57,8 +60,13 @@
                 </Button>
               </div>
             </div>
+            <div v-else>
+              {{ '<3' }}
+            </div>
             <template #button>
-              <div class="cellButton"><Button>piece name</Button></div>
+              <div class="cellButton">
+                <Button class="px-2">{{ getUnit(row, cell) }}</Button>
+              </div>
             </template>
           </Modal>
         </div>
@@ -70,10 +78,14 @@
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
 import { player } from '../Player';
+import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
 
 const selectedUnit = ref('' as type.UnitNames);
+function save() {
+  if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
+}
 function play() {
   router.push({ name: 'Board' });
 }
@@ -97,6 +109,11 @@ function removeFromLineup(line: 'frontline' | 'backline', index: number) {
 function addToLineup(line: 'frontline' | 'backline', index: number) {
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
+}
+function getUnit(row: number, cell: number): type.UnitNames | 'coming soon' {
+  if (row == 1 && cell == 1) return 'King';
+  if (row == 1 && cell == 2) return 'Pawn';
+  return 'coming soon';
 }
 </script>
 <style lang="scss" scoped>

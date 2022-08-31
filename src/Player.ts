@@ -1,4 +1,4 @@
-import { getPlayer, setPlayer } from './API';
+import { getPlayer } from './API';
 import * as type from './types';
 import { ref } from 'vue';
 export const player = ref(getPlayer());
