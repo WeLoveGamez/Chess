@@ -25,32 +25,47 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
 
 export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][], checkIllegalMoves: boolean): Position[] {
   if (fromRow == -1 || fromCell == -1) return [];
-  let legalMoves: Position[] = [];
+
   const tile = board[fromRow][fromCell];
   const piece = tile.type;
   const player = tile.player;
-  if (piece.includes('Rook')) {
-    legalMoves.push(...checkLegalMovesRook(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Knight')) {
-    legalMoves.push(...checkLegalMovesKnight(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Bishop')) {
-    legalMoves.push(...checkLegalMovesBishop(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Queen')) {
-    legalMoves.push(...checkLegalMovesBishop(fromRow, fromCell, player, board));
-    legalMoves.push(...checkLegalMovesRook(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('King')) {
-    legalMoves.push(...checkLegalMovesKing(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Pawn')) {
-    legalMoves.push(...checkLegalMovesPawn(fromRow, fromCell, player, board));
-  }
+  let legalMoves = {
+    Rook: checkLegalMovesRook,
+    Knight: checkLegalMovesKnight,
+    Bishop: checkLegalMovesBishop,
+    Queen: (...args: [number, number, 1 | 2 | 0, Tile[][]]) => [...checkLegalMovesBishop(...args), ...checkLegalMovesRook(...args)],
+    King: checkLegalMovesKing,
+    Pawn: checkLegalMovesPawn,
+    '': () => [],
+  }[piece](fromRow, fromCell, player, board);
+
   if (player && checkIllegalMoves) legalMoves = removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
   return legalMoves;
 }
+// export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][], checkIllegalMoves: boolean): Position[] {
+//   if (fromRow == -1 || fromCell == -1) return [];
+
+//   const tile = board[fromRow][fromCell];
+//   const piece = tile.type;
+//   const player = tile.player;
+//   const legalMoves = {
+//     Rook: checkLegalMovesRook,
+//     Knight: checkLegalMovesKnight,
+//     Bishop: checkLegalMovesBishop,
+//     Queen: checkLegalMovesQueen,
+//     King: checkLegalMovesKing,
+//     Pawn: checkLegalMovesPawn,
+//     '': () => [],
+//   }[piece](fromRow, fromCell, player, board);
+
+//   return legalMoves;
+// }
+// export function checkLegalMovesWithoutIllegals(fromRow: number, fromCell: number, board: Tile[][]): Position[] {
+//   const legalMoves = checkLegalMoves(fromRow, fromCell, board, true);
+//   const player = board[fromRow][fromCell].player;
+//   if (player) return removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
+//   return legalMoves;
+// }
 export function checkAllLegalMoves(board: Tile[][], player: 1 | 2): Position[] {
   let legalMoves: Position[] = [];
   for (let [rowIndex, row] of Object.entries(board)) {

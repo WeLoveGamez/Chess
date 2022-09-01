@@ -132,30 +132,40 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
   // develop
   // trade horses and bishops
 
-  //   {
-  //     let tradeMoves: Move[] = [];
-  //     for (let move of targetablePieces) {
-  //         if(getPieceValue(board[]))
-  //     }
-  //   }
+  let tradeMoves: Move[] = [];
+  {
+    for (let move of targetablePieces) {
+      if (getPieceValue(board.value[move.piece[0]][move.piece[1]].type) <= getPieceValue(board.value[move.target[0]][move.target[1]].type)) {
+        tradeMoves.push(move);
+      }
+    }
+  }
   // move towards enemy king
 
   if (checkmate.piece && checkmate.target) {
     returnMove = checkmate;
     console.log('checkmate');
-  } else if (QueenTakes.length) {
+  } else if (QueenTakes.length > 0) {
     let position = QueenTakes.map(m => m.piece).sort(
       (a, b) => getPieceValue(board.value[a[0]][a[1]].type) - getPieceValue(board.value[b[0]][b[1]].type)
     )[0];
     let target = QueenTakes.find(m => m.piece[0] == position[0] && m.piece[1] == position[1])!.target;
     returnMove = { piece: position, target };
     console.log('takeQueen');
-  } else if (takeBlunders.length && takeBlunders[0].target) {
+  } else if (takeBlunders.length > 0 && takeBlunders[0].target) {
     returnMove = { piece: takeBlunders[0].piece, target: takeBlunders[0].target };
     console.log('takeBlunder');
-  } else if (checks.length) {
+  } else if (checks.length > 0) {
     returnMove = checks[0];
     console.log('check');
+  } else if (tradeMoves.length > 0) {
+    returnMove = tradeMoves.sort(
+      (a, b) =>
+        getPieceValue(board.value[a.piece[0]][a.piece[1]].type) -
+        getPieceValue(board.value[a.target[0]][a.target[1]].type) -
+        (getPieceValue(board.value[b.piece[0]][b.piece[1]].type) - getPieceValue(board.value[b.target[0]][b.target[1]].type))
+    )[tradeMoves.length];
+    console.log('trade');
   }
   //get random move without blunders if nothing else works //TODO: update the if for every prio above
   else {
