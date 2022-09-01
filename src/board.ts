@@ -4,6 +4,7 @@ import type { Position, DeadPiece } from './types';
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
+export const lastMovedCell = computed(() => moveHistory.value.at(-1));
 
 export interface Tile {
   type: typeof PIECES[number] | '';
