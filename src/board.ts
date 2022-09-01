@@ -11,6 +11,9 @@ export interface Tile {
 }
 export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
 
+export const selectedCell = ref<Position>([-1, -1]);
+export const playerTurn = ref<1 | 2>(1);
+
 export const board = ref<Tile[][]>([
   [
     { type: 'Rook', player: 1 },
