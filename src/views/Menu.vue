@@ -4,7 +4,7 @@
     <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
     <div class="mt-1">
       <!-- FIXME: add variablen -->
-      <ProgressBar :progress="player.exp" :max-value="player.lvl * 50"></ProgressBar>
+      <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
     <div class="mt-3">
@@ -44,23 +44,41 @@
         <div class="cell" v-for="cell of 5">
           <!-- FIXME: add variablen -->
           <Modal :title="getUnit(row, cell)">
-            <div class="container" v-if="getUnit(row, cell) != 'coming soon'">
+            <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
               <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.amount}` }}</div>
               <div>
                 <Button>
                   <div>increase</div>
-                  <div>costs: Pi</div>
+                  <div>{{ displayMaxAmountCost(row, cell) }}</div>
                 </Button>
               </div>
               <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
               <div>
                 <Button>
                   <div>increase</div>
-                  <div>costs: Pi</div>
+                  <div>
+                    {{ displayamountPerRoundCost(row, cell) }}
+                  </div>
+                </Button>
+              </div>
+              <div class="text-center">
+                {{
+                  `amount (${player.units.find(e => e.name == getUnit(row, cell))?.amount} / ${
+                    player.units.find(e => e.name == getUnit(row, cell))?.maxAmount
+                  })`
+                }}
+              </div>
+              <div>
+                <Button>
+                  <div>buy</div>
+                  <div>{{ displayBuyCost(row, cell) }}</div>
                 </Button>
               </div>
             </div>
-            <div v-else>
+            <div v-if="getUnit(row, cell).includes('lvl')">
+              {{ getUnit(row, cell) }}
+            </div>
+            <div v-if="getUnit(row, cell) == 'coming soon'">
               {{ '<3' }}
             </div>
             <template #button>
@@ -81,7 +99,7 @@ import { player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
-import { createBoard } from '../board';
+import { createBoard, getPieceValue } from '../board';
 
 const selectedUnit = ref<type.UnitName>('');
 function save() {
@@ -105,6 +123,15 @@ function clickLineup(line: 'frontline' | 'backline', index: number) {
     removeFromLineup(line, index);
   }
 }
+function displayMaxAmountCost(row: number, cell: number) {
+  return `costs: ${(player.value.units.find(e => e.name == getUnit(row, cell))?.maxAmount + 1) * getPieceValue(getUnit(row, cell))}`;
+}
+function displayamountPerRoundCost(row: number, cell: number) {
+  return `costs: ${(player.value.units.find(e => e.name == getUnit(row, cell))?.amountPerRound + 1) * getPieceValue(getUnit(row, cell))}`;
+}
+function displayBuyCost(row: number, cell: number) {
+  return `costs: ${getPieceValue(getUnit(row, cell))}`;
+}
 function removeFromLineup(line: 'frontline' | 'backline', index: number) {
   player.value.lineup[line][index] = '';
 }
@@ -112,9 +139,13 @@ function addToLineup(line: 'frontline' | 'backline', index: number) {
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
 }
-function getUnit(row: number, cell: number): type.UnitName | 'coming soon' {
+function getUnit(row: number, cell: number): type.UnitName | string {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';
+  if (row == 1 && cell == 3) return player.value.lvl >= 2 ? 'Rook' : 'need lvl 2';
+  if (row == 1 && cell == 4) return player.value.lvl >= 5 ? 'Bishop' : 'need lvl 5';
+  if (row == 1 && cell == 5) return player.value.lvl >= 9 ? 'Knight' : 'need lvl 9';
+  if (row == 2 && cell == 1) return player.value.lvl >= 14 ? 'Queen' : 'need lvl 14';
   return 'coming soon';
 }
 </script>

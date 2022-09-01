@@ -67,12 +67,15 @@
     :model-value="!!checkMate"
     @update:model-value="show => (show ? calcAfterGame() : closeModal())"
   >
-    <div>Money:e^i*Pi</div>
-    <div>Exp:Pi</div>
+    <div>{{ `Money: ${rewards.money}` }}</div>
+    <div>{{ `Exp: ${rewards.exp}` }}</div>
+    <template #button>
+      <div></div>
+    </template>
   </Modal>
 </template>
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
 import {
   board,
   Tile,
@@ -91,23 +94,33 @@ import {
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { player } from '../Player';
+import { lvlUp, player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
+const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
-    player.value.money += getPieceValue(piece.name);
+    rewards.value.money += getPieceValue(piece.name);
   }
+  player.value.money += rewards.value.money;
   if (checkMate.value.includes('white'))
     for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
-      player.value.exp += getPieceValue(piece.type);
+      rewards.value.exp += getPieceValue(piece.type);
     }
+  player.value.exp += rewards.value.exp;
+  if (player.value.exp >= player.value.lvl * 10) {
+    lvlUp();
+  }
+  setPlayer(player.value);
+}
+function resetRewards() {
+  rewards.value = { money: 0, exp: 0 };
 }
 function closeModal() {
+  resetRewards();
   handleClick(goToMenu, startGame);
 }
 function goToMenu() {
-  setPlayer(player.value);
   router.push({ name: 'Menu' });
 }
 function startGame() {
