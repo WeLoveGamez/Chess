@@ -26,7 +26,9 @@
         <span class="text-center">Play vs Bot:</span>
         <Button @click="bot = !bot">{{ bot }}</Button>
       </div>
-
+      <div>
+        <Button @click="goToMenu()">Menu</Button>
+      </div>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
       <!-- <div>selectedCell:{{ selectedCell }}</div>
           <div>WhiteChecked:{{ King1Checked }}</div>
@@ -58,8 +60,9 @@
     affirm-alt-text="Menu"
     affirm-text="Play Again"
     :affirm-action="closeModal"
+    :affirm-alt-action="goToMenu"
     :model-value="!!checkMate"
-    @update:model-value="show => (show ? null : closeModal())"
+    @update:model-value="show => (show ? calcAfterGame() : closeModal())"
   >
     <div>Money:e^i*Pi</div>
     <div>Exp:Pi</div>
@@ -67,20 +70,40 @@
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn, createBoard } from '../board';
+import {
+  board,
+  Tile,
+  applyMove,
+  moveHistory,
+  King1Checked,
+  King2Checked,
+  PIECES,
+  selectedCell,
+  playerTurn,
+  createBoard,
+  deadPieces,
+  getPieceValue,
+} from '../board';
 import { Button, handleClick, Modal } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
 import { player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
+function calcAfterGame() {
+  for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
+    player.value.money += getPieceValue(piece.name);
+  }
+  if (checkMate.value.includes('white'))
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      player.value.exp += getPieceValue(piece.type);
+    }
+}
 function closeModal() {
   handleClick(goToMenu, startGame);
 }
 function goToMenu() {
   setPlayer(player.value);
-  if (!!checkMate) {
-    router.push({ name: 'Menu' });
-  }
+  router.push({ name: 'Menu' });
 }
 function startGame() {
   createBoard();

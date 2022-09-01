@@ -1,6 +1,6 @@
 import { computed, Ref, ref } from 'vue';
 import { checkChecks } from './moves';
-import type { Position } from './types';
+import type { Position, DeadPiece } from './types';
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
@@ -15,11 +15,12 @@ export const selectedCell = ref<Position>([-1, -1]);
 export const playerTurn = ref<1 | 2>(1);
 
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
-
+export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
 createBoard();
 export function createBoard() {
   playerTurn.value = 1;
+  deadPieces.value = [];
   board.value = [
     [
       { type: 'Rook', player: 1 },
@@ -161,10 +162,13 @@ export function applyMove(
     copyBoard[fromRow][fromCell] = { type: '', player: 0 };
 
     if (playerTurn && selectedCell) {
+      const player = board[toRow][toCell].player;
+      if (player) deadPieces.value.push({ name: board[toRow][toCell].type, player: player });
       moveHistory?.value.push({ from: [fromRow, fromCell], to: [toRow, toCell], piece: board[fromRow][fromCell].type });
       playerTurn.value = playerTurn.value == 1 ? 2 : 1;
       selectedCell.value = [-1, -1];
     }
   }
+
   return copyBoard;
 }
