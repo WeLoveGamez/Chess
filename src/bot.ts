@@ -159,14 +159,21 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
     returnMove = checks[0];
     console.log('check');
   } else if (tradeMoves.length > 0) {
-    returnMove = tradeMoves.sort(
-      (a, b) =>
-        getPieceValue(board.value[a.piece[0]][a.piece[1]].type) -
-        getPieceValue(board.value[a.target[0]][a.target[1]].type) -
-        (getPieceValue(board.value[b.piece[0]][b.piece[1]].type) - getPieceValue(board.value[b.target[0]][b.target[1]].type))
-    )[tradeMoves.length];
-    console.log('trade');
+    let best = tradeMoves[0];
+    let bestDifference =
+      getPieceValue(board.value[best.target[0]][best.target[1]].type) - getPieceValue(board.value[best.piece[0]][best.piece[1]].type);
+    for (let move of tradeMoves) {
+      let piece = board.value[move.piece[0]][move.piece[1]];
+      let target = board.value[move.target[0]][move.target[1]];
+      if (getPieceValue(target.type) - getPieceValue(piece.type) > bestDifference) {
+        best = move;
+        bestDifference = getPieceValue(target.type) - getPieceValue(piece.type);
+      }
+    }
+    returnMove = best;
+    console.log('trade', '+', bestDifference);
   }
+
   //get random move without blunders if nothing else works //TODO: update the if for every prio above
   else {
     let rndMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
