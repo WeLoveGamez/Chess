@@ -90,7 +90,6 @@ import {
 } from '../board';
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
-// test
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
 import { player } from '../Player';
 import { setPlayer } from '../API';
