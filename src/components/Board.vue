@@ -53,13 +53,38 @@
   <div class="numbers">
     <div v-for="number in '87654321'">{{ number }}</div>
   </div> -->
+  <Modal
+    :title="checkMate"
+    affirm-alt-text="Menu"
+    affirm-text="Play Again"
+    :affirm-action="closeModal"
+    :model-value="!!checkMate"
+    @update:model-value="show => (show ? null : closeModal())"
+  >
+    <div>Money:e^i*Pi</div>
+    <div>Exp:Pi</div>
+  </Modal>
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn } from '../board';
-
-import { Button } from 'custom-mbd-components';
+import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn, createBoard } from '../board';
+import { Button, handleClick, Modal } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
+import { player } from '../Player';
+import { setPlayer } from '../API';
+import router from '../router';
+function closeModal() {
+  handleClick(goToMenu, startGame);
+}
+function goToMenu() {
+  setPlayer(player.value);
+  if (!!checkMate) {
+    router.push({ name: 'Menu' });
+  }
+}
+function startGame() {
+  createBoard();
+}
 
 function cellClicked(rowIndex: number, cellIndex: number) {
   if (openPromotePawnSelect.value) return;
