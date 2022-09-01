@@ -1,5 +1,5 @@
 import type { Position } from './types';
-import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, Tile } from './board';
+import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard } from './board';
 import { checkAllLegalMoves, checkLegalMoves, checkChecks } from './moves';
 import { computed, ref } from 'vue';
 
@@ -208,7 +208,7 @@ export const checkMate = computed(() =>
     ? 'checkmate for white'
     : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
     ? 'checkmate for black'
-    : King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0
+    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0) || piecesOnBoard.value == 2
     ? 'stalemate'
     : ''
 );

@@ -29,7 +29,9 @@
         <span class="text-center">Play vs Bot:</span>
         <Button @click="bot = !bot">{{ bot }}</Button>
       </div>
-
+      <div>
+        <Button @click="goToMenu()">Menu</Button>
+      </div>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
       <!-- <div>selectedCell:{{ selectedCell }}</div>
           <div>WhiteChecked:{{ King1Checked }}</div>
@@ -56,13 +58,61 @@
   <div class="numbers">
     <div v-for="number in '87654321'">{{ number }}</div>
   </div> -->
+  <Modal
+    :title="checkMate"
+    affirm-alt-text="Menu"
+    affirm-text="Play Again"
+    :affirm-action="closeModal"
+    :affirm-alt-action="goToMenu"
+    :model-value="!!checkMate"
+    @update:model-value="show => (show ? calcAfterGame() : closeModal())"
+  >
+    <div>Money:e^i*Pi</div>
+    <div>Exp:Pi</div>
+  </Modal>
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn, lastMovedCell } from '../board';
+import {
+  board,
+  Tile,
+  applyMove,
+  moveHistory,
+  King1Checked,
+  King2Checked,
+  PIECES,
+  selectedCell,
+  playerTurn,
+  createBoard,
+  deadPieces,
+  getPieceValue,
+  lastMovedCell,
+} from '../board';
 
-import { Button } from 'custom-mbd-components';
+import { Modal, Button, handleClick } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
+import { player } from '../Player';
+import { setPlayer } from '../API';
+import router from '../router';
+function calcAfterGame() {
+  for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
+    player.value.money += getPieceValue(piece.name);
+  }
+  if (checkMate.value.includes('white'))
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      player.value.exp += getPieceValue(piece.type);
+    }
+}
+function closeModal() {
+  handleClick(goToMenu, startGame);
+}
+function goToMenu() {
+  setPlayer(player.value);
+  router.push({ name: 'Menu' });
+}
+function startGame() {
+  createBoard();
+}
 
 function cellClicked(rowIndex: number, cellIndex: number) {
   if (openPromotePawnSelect.value) return;

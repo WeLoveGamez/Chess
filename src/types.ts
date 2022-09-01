@@ -7,7 +7,10 @@ export interface Player {
   lineup: Lineup;
 }
 export type UnitName = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn' | '';
-
+export interface DeadPiece {
+  player: 1 | 2;
+  name: UnitName;
+}
 export interface Unit {
   name: UnitName;
   amount: number;

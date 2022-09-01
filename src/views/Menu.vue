@@ -81,12 +81,14 @@ import { player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
+import { createBoard } from '../board';
 
 const selectedUnit = ref<type.UnitName>('');
 function save() {
   if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
 }
 function play() {
+  createBoard();
   router.push({ name: 'Board' });
 }
 function availableNumber(unit: type.Unit) {
