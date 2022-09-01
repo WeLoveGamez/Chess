@@ -12,6 +12,7 @@
               whitePiece: board[rowIndex][cellIndex].player == 1,
               blackPiece: board[rowIndex][cellIndex].player == 2,
               checking: [...King2Checked, ...King1Checked].find(p => p[0] == rowIndex && p[1] == cellIndex),
+              lastMoved: lastMovedCell?.from[0] == rowIndex && lastMovedCell?.from[1] == cellIndex,
             }"
             @click.stop="cellClicked(rowIndex, cellIndex)"
           >
@@ -56,7 +57,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn } from '../board';
+import { board, Tile, applyMove, moveHistory, King1Checked, King2Checked, PIECES, selectedCell, playerTurn, lastMovedCell } from '../board';
 
 import { Button } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
@@ -89,6 +90,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
 function botMove() {
   if (openPromotePawnSelect.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
+  if (!move.piece[0] || !move.target[0]) return;
   selectedCell.value = move.piece;
   board.value = applyMove(
     move.piece[0],
@@ -182,6 +184,9 @@ aside * {
 }
 .legal {
   background-color: aqua !important;
+}
+.lastMoved {
+  background-color: rgb(146, 155, 108) !important;
 }
 .whitePiece {
   color: white;

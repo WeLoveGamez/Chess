@@ -214,6 +214,7 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
     }
     legalMoves.push([fromRow + rowOffset, fromCell + cellOffset]);
   }
+  if (!(board.length == 8 && board[0].length == 8)) return legalMoves;
   //große Rochade schwarz
   if (
     player == 2 &&
