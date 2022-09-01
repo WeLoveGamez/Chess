@@ -127,9 +127,6 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
     }
   }
 
-  // prevent blunders
-
-  // develop
   // trade horses and bishops
 
   let tradeMoves: Move[] = [];
@@ -140,21 +137,85 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
       }
     }
   }
+
+  //TODO:
+  // prevent blunders
+  let blunderedPieces: Position[] = [];
+  {
+    let allEnemyMoves: Move[] = [];
+    {
+      for (let position of getMoveableBotPieces(botPlayer.value == 1 ? 2 : 1)) {
+        let targets = checkLegalMoves(position[0], position[1], board.value, true);
+        for (let target of targets) {
+          allEnemyMoves.push({ piece: position, target: target });
+        }
+      }
+    }
+
+    let possibleBlunders: Move[] = [];
+    for (let move of allEnemyMoves) {
+      let tile = board.value[move.target[0]][move.target[1]];
+      if (tile.player == botPlayer.value && tile.type != 'Pawn') {
+        possibleBlunders.push(move);
+      }
+    }
+
+    let coveredFields: Position[] = [];
+    {
+      for (let move of allEnemyMoves) {
+        if (
+          checkAllLegalMoves(
+            applyMove(
+              move.piece[0],
+              move.piece[1],
+              move.target[0],
+              move.target[1],
+              checkLegalMoves(move.piece[0], move.piece[1], board.value, true),
+              board.value
+            ),
+            botPlayer.value
+          ).find(m => m[0] == move.target[0] && m[1] == move.target[1])
+        )
+          coveredFields.push(move.target);
+      }
+    }
+
+    for (let move of possibleBlunders) {
+      if (
+        !coveredFields.find(f => f[0] == move.piece[0] && f[1] == move.piece[1]) ||
+        getPieceValue(board.value[move.piece[0]][move.piece[1]].type) > getPieceValue(board.value[move.target[0]][move.target[1]].type)
+      ) {
+        blunderedPieces.push(move.target);
+      }
+    }
+  }
   // move towards enemy king
+  // develop
 
   if (checkmate.piece && checkmate.target) {
     returnMove = checkmate;
     console.log('checkmate');
-  } else if (QueenTakes.length > 0) {
-    let position = QueenTakes.map(m => m.piece).sort(
-      (a, b) => getPieceValue(board.value[a[0]][a[1]].type) - getPieceValue(board.value[b[0]][b[1]].type)
-    )[0];
-    let target = QueenTakes.find(m => m.piece[0] == position[0] && m.piece[1] == position[1])!.target;
-    returnMove = { piece: position, target };
-    console.log('takeQueen');
-  } else if (takeBlunders.length > 0 && takeBlunders[0].target) {
-    returnMove = { piece: takeBlunders[0].piece, target: takeBlunders[0].target };
-    console.log('takeBlunder');
+  } else if (QueenTakes.length > 0 || takeBlunders.length > 0) {
+    if (QueenTakes.length > 0) {
+      let position = QueenTakes.map(m => m.piece).sort(
+        (a, b) => getPieceValue(board.value[a[0]][a[1]].type) - getPieceValue(board.value[b[0]][b[1]].type)
+      )[0];
+      let target = QueenTakes.find(m => m.piece[0] == position[0] && m.piece[1] == position[1])!.target;
+      // if(board.value[position[0]][position[1]].type == 'Queen' && takeBlunders.length >0)
+      returnMove = { piece: position, target };
+      console.log('takeQueen');
+      if (board.value[position[0]][position[1]].type == 'Queen' && takeBlunders.length > 0 && takeBlunders[0].target) {
+        returnMove = takeBlunder(takeBlunders);
+      }
+    } else if (takeBlunders.length > 0 && takeBlunders[0].target) {
+      returnMove = takeBlunder(takeBlunders);
+    }
+  } else if (blunderedPieces.length > 0) {
+    let filteredMoves = allMoves
+      .filter(m => m.piece[0] == blunderedPieces[0][0])
+      .filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
+    returnMove = filteredMoves[Math.floor(Math.random() * filteredMoves.length)];
+    console.log('preventBlunder');
   } else if (checks.length > 0) {
     returnMove = checks[0];
     console.log('check');
@@ -187,7 +248,10 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
   }
   return returnMove;
 }
-
+function takeBlunder(takeBlunders: { piece: Position; target: Position }[]) {
+  console.log('takeBlunder');
+  return { piece: takeBlunders[0].piece, target: takeBlunders[0].target };
+}
 export function getMoveableBotPieces(botPlayer: number) {
   let pieces: Position[] = [];
   for (let [rowIndex, row] of Object.entries(board.value)) {
