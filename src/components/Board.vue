@@ -181,14 +181,15 @@ aside * {
   box-shadow: inset 0 0 0 2000px rgba(35, 211, 0, 0.5);
   color: white;
 }
+
+.lastMoved {
+  background-color: rgb(146, 155, 108) !important;
+}
 .checking {
   background-color: red !important;
 }
 .legal {
   background-color: aqua !important;
-}
-.lastMoved {
-  background-color: rgb(146, 155, 108) !important;
 }
 .whitePiece {
   color: white;
