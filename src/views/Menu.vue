@@ -48,14 +48,14 @@
             <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
               <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
               <div>
-                <Button @click="buyMaxAmount(getUnit(row, cell))">
+                <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitName)">
                   <div>increase</div>
                   <div>{{ displayMaxAmountCost(row, cell) }}</div>
                 </Button>
               </div>
               <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
               <div>
-                <Button @click="buyAmountPerRound(getUnit(row, cell))">
+                <Button @click="buyAmountPerRound(getUnit(row, cell) as type.UnitName)">
                   <div>increase</div>
                   <div>
                     {{ displayamountPerRoundCost(row, cell) }}
@@ -70,7 +70,7 @@
                 }}
               </div>
               <div>
-                <Button @click="buyUnit(getUnit(row, cell))">
+                <Button @click="buyUnit(getUnit(row, cell) as type.UnitName)">
                   <div>buy</div>
                   <div>{{ displayBuyCost(row, cell) }}</div>
                 </Button>
@@ -114,7 +114,7 @@ function play() {
 }
 const haveAllNeedUnits = computed(() => {
   let copyPlayer: type.Player = JSON.parse(JSON.stringify(player.value));
-  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline)) {
+  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {
     copyPlayer.units.find(e => e.name == name)!.amount--;
   }
   return copyPlayer.units.every(e => e.amount >= 0);
@@ -134,13 +134,18 @@ function clickLineup(line: 'frontline' | 'backline', index: number) {
   }
 }
 function displayMaxAmountCost(row: number, cell: number) {
-  return `costs: ${(player.value.units.find(e => e.name == getUnit(row, cell))?.maxAmount + 1) * getPieceValue(getUnit(row, cell))}`;
+  const name = getUnit(row, cell) as type.UnitName;
+  const maxAmount = player.value.units.find(e => e.name == name)?.maxAmount;
+  if (maxAmount) return `costs: ${(maxAmount + 1) * getPieceValue(name)}`;
 }
 function displayamountPerRoundCost(row: number, cell: number) {
-  return `costs: ${(player.value.units.find(e => e.name == getUnit(row, cell))?.amountPerRound + 1) * getPieceValue(getUnit(row, cell))}`;
+  const name = getUnit(row, cell) as type.UnitName;
+  const amountPerRound = player.value.units.find(e => e.name == name)?.maxAmount;
+  if (amountPerRound) return `costs: ${(amountPerRound + 1) * getPieceValue(name)}`;
 }
 function displayBuyCost(row: number, cell: number) {
-  return `costs: ${getPieceValue(getUnit(row, cell))}`;
+  const name = getUnit(row, cell) as type.UnitName;
+  return `costs: ${getPieceValue(name)}`;
 }
 function buyMaxAmount(name: type.UnitName) {
   const unit = player.value.units.find(e => e.name == name);
