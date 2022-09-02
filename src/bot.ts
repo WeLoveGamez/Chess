@@ -5,9 +5,9 @@ import { computed, ref } from 'vue';
 
 export const bot = ref(true);
 export const botPlayer = ref<1 | 2>(2);
+export type Move = { piece: Position; target: Position };
 
-export function getGoodBotMove(moveableBotPieces: Position[]) {
-  type Move = { piece: Position; target: Position };
+export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: Move[]): Move {
   let returnMove = {} as Move;
 
   //getAllMoves possible
@@ -20,7 +20,14 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
       }
     }
   }
+  if (restrictedMoves && restrictedMoves.length > 0) allMoves = restrictedMoves;
 
+  let restrictedMove;
+  if (!restrictedMoves) {
+    console.log('get restricted move');
+    let noKingMoves = allMoves.filter(m => board.value[m.piece[0]][m.piece[1]].type != 'King');
+    restrictedMove = getGoodBotMove(moveableBotPieces, noKingMoves);
+  }
   //dont go on covered Fields
   let coveredFields: Position[] = [];
   {
@@ -138,7 +145,6 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
     }
   }
 
-  //TODO:
   // prevent blunders
   let blunderedPieces: Position[] = [];
   {
@@ -155,7 +161,7 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
     let possibleBlunders: Move[] = [];
     for (let move of allEnemyMoves) {
       let tile = board.value[move.target[0]][move.target[1]];
-      if (tile.player == botPlayer.value && tile.type != 'Pawn') {
+      if (tile.player == botPlayer.value) {
         possibleBlunders.push(move);
       }
     }
@@ -189,13 +195,49 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
       }
     }
   }
+
+  //TODO:
   // move towards enemy king
   // develop
 
-  if (checkmate.piece && checkmate.target) {
-    returnMove = checkmate;
-    console.log('checkmate');
-  } else if (QueenTakes.length > 0 || takeBlunders.length > 0) {
+  let bestDifference, best;
+  if (tradeMoves.length > 0) {
+    best = tradeMoves[0];
+    bestDifference = getPieceValue(board.value[best.target[0]][best.target[1]].type) - getPieceValue(board.value[best.piece[0]][best.piece[1]].type);
+    for (let move of tradeMoves) {
+      let piece = board.value[move.piece[0]][move.piece[1]];
+      let target = board.value[move.target[0]][move.target[1]];
+      if (getPieceValue(target.type) - getPieceValue(piece.type) > bestDifference) {
+        best = move;
+        bestDifference = getPieceValue(target.type) - getPieceValue(piece.type);
+      }
+    }
+    returnMove = best;
+    console.log('trade', '+', bestDifference, { tradeMoves });
+  }
+
+  if (blunderedPieces.length > 0) {
+    let filteredMoves = allMoves
+      .filter(m => blunderedPieces.find(p => p[0] == m.piece[0] && p[1] == m.piece[1]))
+      .filter(m => !blunderedPieces.find(p => p[0] == m.piece[0] && p[1] == m.piece[1] && board.value[p[0]][p[1]].type == 'Pawn'))
+      .filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
+    returnMove = filteredMoves[Math.floor(Math.random() * filteredMoves.length)];
+    console.log('preventBlunder', blunderedPieces);
+  }
+  //check if best trade is better than enemies blunder
+  if (
+    best &&
+    blunderedPieces.length > 0 &&
+    bestDifference &&
+    getPieceValue(board.value[returnMove.target[0]][returnMove.target[1]].type) < bestDifference
+  ) {
+    returnMove = best;
+  }
+  //check if "blundered" piece can trade
+  if (best && blunderedPieces.length > 0 && tradeMoves.find(m => blunderedPieces.find(p => p[0] == m.piece[0] && p[1] == m.piece[1]))) {
+    returnMove = best;
+  }
+  if (QueenTakes.length > 0 || takeBlunders.length > 0) {
     if (QueenTakes.length > 0) {
       let position = QueenTakes.map(m => m.piece).sort(
         (a, b) => getPieceValue(board.value[a[0]][a[1]].type) - getPieceValue(board.value[b[0]][b[1]].type)
@@ -210,46 +252,38 @@ export function getGoodBotMove(moveableBotPieces: Position[]) {
     } else if (takeBlunders.length > 0 && takeBlunders[0].target) {
       returnMove = takeBlunder(takeBlunders);
     }
-  } else if (blunderedPieces.length > 0) {
-    let filteredMoves = allMoves
-      .filter(m => m.piece[0] == blunderedPieces[0][0])
-      .filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
-    returnMove = filteredMoves[Math.floor(Math.random() * filteredMoves.length)];
-    console.log('preventBlunder');
-  } else if (checks.length > 0) {
+  }
+  if (checks.length > 0) {
     returnMove = checks[0];
     console.log('check');
-  } else if (tradeMoves.length > 0) {
-    let best = tradeMoves[0];
-    let bestDifference =
-      getPieceValue(board.value[best.target[0]][best.target[1]].type) - getPieceValue(board.value[best.piece[0]][best.piece[1]].type);
-    for (let move of tradeMoves) {
-      let piece = board.value[move.piece[0]][move.piece[1]];
-      let target = board.value[move.target[0]][move.target[1]];
-      if (getPieceValue(target.type) - getPieceValue(piece.type) > bestDifference) {
-        best = move;
-        bestDifference = getPieceValue(target.type) - getPieceValue(piece.type);
-      }
-    }
-    returnMove = best;
-    console.log('trade', '+', bestDifference);
   }
-
+  if (checkmate.piece && checkmate.target) {
+    returnMove = checkmate;
+    console.log('checkmate');
+  }
   //get random move without blunders if nothing else works //TODO: update the if for every prio above
-  else {
-    let rndMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
-    let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
-    returnMove = move;
-
-    if (!move?.piece[0] || !move?.target[0]) {
-      returnMove = allMoves[Math.floor(Math.random() * allMoves.length)];
-    }
-    console.log('RandomMove');
+  if (!returnMove?.piece?.[0] || !returnMove?.target?.[0]) {
+    console.log('no returnMove found');
+    returnMove = getRandomMove(coveredFields, allMoves);
   }
+  console.log(returnMove);
+  if (restrictedMove) return restrictedMove;
+  return returnMove;
+}
+function getRandomMove(coveredFields: Position[], allMoves: Move[]) {
+  let returnMove: Move;
+  let rndMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
+  let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
+  returnMove = move;
+
+  if (!move?.piece[0] || !move?.target[0]) {
+    returnMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+  }
+  console.log('RandomMove');
   return returnMove;
 }
 function takeBlunder(takeBlunders: { piece: Position; target: Position }[]) {
-  console.log('takeBlunder');
+  console.log('takeBlunder', { takeBlunders });
   return { piece: takeBlunders[0].piece, target: takeBlunders[0].target };
 }
 export function getMoveableBotPieces(botPlayer: number) {
