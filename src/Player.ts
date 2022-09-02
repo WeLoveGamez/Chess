@@ -8,10 +8,10 @@ if (!player.value) {
     money: 0,
     lvl: 1,
     units: [
-      { name: 'Pawn', value: 1, maxAmount: 3, amount: 3, amountPerRound: 3 },
+      { name: 'Pawn', value: 1, maxAmount: 5, amount: 5, amountPerRound: 5 },
       { name: 'King', value: 3.5, maxAmount: 1, amount: 1, amountPerRound: 1 },
     ],
-    lineup: { frontline: ['', 'Pawn', ''], backline: ['Pawn', 'King', 'Pawn'] },
+    lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
   };
 }
 export const boardSize = computed(() => {

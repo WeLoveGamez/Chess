@@ -111,6 +111,13 @@ function calcAfterGame() {
   if (player.value.exp >= player.value.lvl * 10) {
     lvlUp();
   }
+  for (let piece of deadPieces.value.filter(e => e.player == 1)) {
+    player.value.units.find(e => e.name == piece.name)!.amount--;
+  }
+  for (let piece of player.value.units) {
+    piece.amount += piece.amountPerRound;
+    if (piece.amount > piece.maxAmount) piece.amount = piece.maxAmount;
+  }
   setPlayer(player.value);
 }
 function resetRewards() {

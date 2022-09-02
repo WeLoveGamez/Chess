@@ -5,6 +5,7 @@
       <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
+    <div v-if="!haveAllNeedUnits">you do not own all the required figures</div>
     <div class="mt-3">
       <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
         <div class="container">
@@ -107,9 +108,17 @@ function save() {
   if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
 }
 function play() {
+  if (!haveAllNeedUnits) return;
   createBoard();
   router.push({ name: 'Board' });
 }
+const haveAllNeedUnits = computed(() => {
+  let copyPlayer: type.Player = JSON.parse(JSON.stringify(player.value));
+  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline)) {
+    copyPlayer.units.find(e => e.name == name)!.amount--;
+  }
+  return copyPlayer.units.every(e => e.amount >= 0);
+});
 function availableNumber(unit: type.Unit) {
   let i = 0;
   for (let name of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
