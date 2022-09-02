@@ -87,7 +87,7 @@
               </div>
               <template #button>
                 <div class="cellButton">
-                  <Button class="px-2">{{ getUnit(row, cell) }}</Button>
+                  <Button class="px-2" style="font-size: 0.8rem">{{ getUnit(row, cell) }}</Button>
                 </div>
               </template>
             </Modal>
