@@ -1,6 +1,6 @@
 <template>
   <main class="container flex-column" @click="selectedCell = [-1, -1]">
-    <div>
+    <div class="d-flex justify-content-center">
       <div class="board flex-row">
         <div class="row" v-for="(row, rowIndex) in board">
           <div
@@ -67,12 +67,15 @@
     :model-value="!!checkMate"
     @update:model-value="show => (show ? calcAfterGame() : closeModal())"
   >
-    <div>Money:e^i*Pi</div>
-    <div>Exp:Pi</div>
+    <div>{{ `Money: ${rewards.money}` }}</div>
+    <div>{{ `Exp: ${rewards.exp}` }}</div>
+    <template #button>
+      <div></div>
+    </template>
   </Modal>
 </template>
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
 import {
   board,
   Tile,
@@ -91,23 +94,40 @@ import {
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { player } from '../Player';
+import { lvlUp, player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
+const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
-    player.value.money += getPieceValue(piece.name);
+    rewards.value.money += getPieceValue(piece.name);
   }
+  player.value.money += rewards.value.money;
   if (checkMate.value.includes('white'))
     for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
-      player.value.exp += getPieceValue(piece.type);
+      rewards.value.exp += getPieceValue(piece.type);
     }
+  player.value.exp += rewards.value.exp;
+  if (player.value.exp >= player.value.lvl * 10) {
+    lvlUp();
+  }
+  for (let piece of deadPieces.value.filter(e => e.player == 1)) {
+    player.value.units.find(e => e.name == piece.name)!.amount--;
+  }
+  for (let piece of player.value.units) {
+    piece.amount += piece.amountPerRound;
+    if (piece.amount > piece.maxAmount) piece.amount = piece.maxAmount;
+  }
+  setPlayer(player.value);
+}
+function resetRewards() {
+  rewards.value = { money: 0, exp: 0 };
 }
 function closeModal() {
+  resetRewards();
   handleClick(goToMenu, startGame);
 }
 function goToMenu() {
-  setPlayer(player.value);
   router.push({ name: 'Menu' });
 }
 function startGame() {
@@ -171,7 +191,8 @@ function choosePromotionPiece(piece: Tile['type']) {
 const openPromotePawnSelect = computed(() => {
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && (+rowIndex == 0 || +rowIndex == 7)) return [+rowIndex, +cellIndex];
+      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length && cell.player == 1)))
+        return [+rowIndex, +cellIndex];
     }
   }
   return null;
@@ -192,13 +213,11 @@ function getUnicodePiece(string: Tile['type']) {
 </script>
 <style lang="scss" scoped>
 $size: 12vw;
-
+$sizePc: 12vh;
 .board {
   transform: rotateX(180deg);
-
   .row {
-    display: grid;
-    grid-template-columns: repeat(8, auto);
+    display: flex;
     .cell {
       border: 1px solid #000;
       display: flex;
@@ -206,6 +225,11 @@ $size: 12vw;
       align-items: center;
       width: $size;
       height: $size;
+      @media (min-width: 1000px) {
+        width: $sizePc;
+        height: $sizePc;
+      }
+
       cursor: pointer;
       background-color: gray;
       transform: rotateX(180deg);
@@ -218,7 +242,7 @@ $size: 12vw;
 }
 
 aside * {
-  margin: 20px;
+  margin-bottom: 0.25rem;
 }
 
 .row:nth-child(odd) .cell:nth-child(even) {
@@ -281,6 +305,10 @@ main {
   * {
     width: $size;
     height: $size;
+    @media (min-width: 1000px) {
+      width: $sizePc;
+      height: $sizePc;
+    }
     cursor: pointer;
   }
 }

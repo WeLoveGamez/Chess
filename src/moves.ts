@@ -42,30 +42,6 @@ export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[]
   if (player && checkIllegalMoves) legalMoves = removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
   return legalMoves;
 }
-// export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][], checkIllegalMoves: boolean): Position[] {
-//   if (fromRow == -1 || fromCell == -1) return [];
-
-//   const tile = board[fromRow][fromCell];
-//   const piece = tile.type;
-//   const player = tile.player;
-//   const legalMoves = {
-//     Rook: checkLegalMovesRook,
-//     Knight: checkLegalMovesKnight,
-//     Bishop: checkLegalMovesBishop,
-//     Queen: checkLegalMovesQueen,
-//     King: checkLegalMovesKing,
-//     Pawn: checkLegalMovesPawn,
-//     '': () => [],
-//   }[piece](fromRow, fromCell, player, board);
-
-//   return legalMoves;
-// }
-// export function checkLegalMovesWithoutIllegals(fromRow: number, fromCell: number, board: Tile[][]): Position[] {
-//   const legalMoves = checkLegalMoves(fromRow, fromCell, board, true);
-//   const player = board[fromRow][fromCell].player;
-//   if (player) return removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
-//   return legalMoves;
-// }
 export function checkAllLegalMoves(board: Tile[][], player: 1 | 2): Position[] {
   let legalMoves: Position[] = [];
   for (let [rowIndex, row] of Object.entries(board)) {
@@ -81,7 +57,6 @@ function checkLegalMovesPawn(fromRow: number, fromCell: number, player: 1 | 2 | 
   const playerOffset = player == 1 ? 1 : -1;
   //straight
   if (board[fromRow + playerOffset]?.[fromCell]?.type == '') legalMoves.push([fromRow + playerOffset, fromCell]);
-
   //straight 2
   if (
     fromRow == (playerOffset == 1 ? 1 : 6) &&
@@ -288,7 +263,7 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
 function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 | 2, fromRow: number, fromCell: number): Position[] {
   const checks: Position[] = [];
   if (!board[fromRow][fromCell].type) return [];
-  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= 7 && m[1] <= 7 && 0 <= m[1]);
+  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= board.length - 1 && m[1] <= board.length - 1 && 0 <= m[1]);
   for (let action of legalMoves) {
     if (checkChecks(player, applyMove(fromRow, fromCell, action[0], action[1], legalMoves, board)).length > 0) {
       checks.push(action);
