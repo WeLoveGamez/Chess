@@ -1,6 +1,6 @@
 <template>
   <main class="container flex-column" @click="selectedCell = [-1, -1]">
-    <div>
+    <div class="d-flex justify-content-center">
       <div class="board flex-row">
         <div class="row" v-for="(row, rowIndex) in board">
           <div
@@ -213,10 +213,9 @@ function getUnicodePiece(string: Tile['type']) {
 </script>
 <style lang="scss" scoped>
 $size: 12vw;
-
+$sizePc: 12vh;
 .board {
   transform: rotateX(180deg);
-
   .row {
     display: flex;
     .cell {
@@ -226,6 +225,11 @@ $size: 12vw;
       align-items: center;
       width: $size;
       height: $size;
+      @media (min-width: 1000px) {
+        width: $sizePc;
+        height: $sizePc;
+      }
+
       cursor: pointer;
       background-color: gray;
       transform: rotateX(180deg);
@@ -238,7 +242,7 @@ $size: 12vw;
 }
 
 aside * {
-  margin: 20px;
+  margin-bottom: 0.25rem;
 }
 
 .row:nth-child(odd) .cell:nth-child(even) {
@@ -301,6 +305,10 @@ main {
   * {
     width: $size;
     height: $size;
+    @media (min-width: 1000px) {
+      width: $sizePc;
+      height: $sizePc;
+    }
     cursor: pointer;
   }
 }

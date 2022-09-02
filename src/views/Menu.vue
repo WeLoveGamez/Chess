@@ -1,93 +1,97 @@
 <template>
-  <div class="container">
-    <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
-    <div class="mt-1">
-      <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
-    </div>
-    <div class="mt-3"><Button @click="play()">Play</Button></div>
-    <div v-if="!haveAllNeedUnits">you do not own all the required figures</div>
-    <div class="mt-3">
-      <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
-        <div class="container">
-          <div>
-            {{ `${usedValue} /${maxValue}` }}
-          </div>
-          <div class="d-flex">
-            <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
-              {{ `${unit.name}: ${availableNumber(unit)}` }}
-            </div>
-          </div>
-          <div>
-            {{ selectedUnit || 'no selected unit' }}
-          </div>
-          <div class="lineup">
-            <div class="d-flex">
-              <button v-for="index of boardSize.row" class="frontline" @click="clickLineup('frontline', index - 1)">
-                {{ player.lineup.frontline[index - 1] }}
-              </button>
+  <div>
+    <div class="container">
+      <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
+      <div class="mt-1">
+        <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
+      </div>
+      <div class="mt-3"><Button @click="play()">Play</Button></div>
+      <div v-if="!haveAllNeedUnits">you do not own all the required figures</div>
+      <div class="mt-3">
+        <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
+          <div class="container">
+            <div>
+              {{ `${usedValue} /${maxValue}` }}
             </div>
             <div class="d-flex">
-              <button v-for="index of boardSize.row" class="backline" @click="clickLineup('backline', index - 1)">
-                {{ player.lineup.backline[index - 1] }}
-              </button>
+              <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
+                {{ `${unit.name}: ${availableNumber(unit)}` }}
+              </div>
+            </div>
+            <div>
+              {{ selectedUnit || 'no selected unit' }}
+            </div>
+            <div class="lineup">
+              <div class="d-flex">
+                <button v-for="index of boardSize.row" class="frontline" @click="clickLineup('frontline', index - 1)">
+                  {{ player.lineup.frontline[index - 1] }}
+                </button>
+              </div>
+              <div class="d-flex">
+                <button v-for="index of boardSize.row" class="backline" @click="clickLineup('backline', index - 1)">
+                  {{ player.lineup.backline[index - 1] }}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <template #button>
-          <div class="cellButton"><Button>Lineup</Button></div>
-        </template>
-      </Modal>
+          <template #button>
+            <div class="cellButton"><Button>Lineup</Button></div>
+          </template>
+        </Modal>
+      </div>
+      <div class="text-center mt-3">
+        {{ `money: ${player.money}` }}
+      </div>
     </div>
-    <div class="text-center mt-3">
-      {{ `money: ${player.money}` }}
-    </div>
-    <div class="mt-1">
-      <div class="row" v-for="row of 5">
-        <div class="cell" v-for="cell of 5">
-          <Modal :title="getUnit(row, cell)">
-            <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
-              <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
-              <div>
-                <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitName)">
-                  <div>increase</div>
-                  <div>{{ displayMaxAmountCost(row, cell) }}</div>
-                </Button>
+    <div class="d-flex justify-content-center">
+      <div class="mt-1">
+        <div class="row" v-for="row of 5">
+          <div class="cell" v-for="cell of 5">
+            <Modal :title="getUnit(row, cell)">
+              <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
+                <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
+                <div>
+                  <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitName)">
+                    <div>increase</div>
+                    <div>{{ displayMaxAmountCost(row, cell) }}</div>
+                  </Button>
+                </div>
+                <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
+                <div>
+                  <Button @click="buyAmountPerRound(getUnit(row, cell) as type.UnitName)">
+                    <div>increase</div>
+                    <div>
+                      {{ displayamountPerRoundCost(row, cell) }}
+                    </div>
+                  </Button>
+                </div>
+                <div class="text-center">
+                  {{
+                    `amount (${player.units.find(e => e.name == getUnit(row, cell))?.amount} / ${
+                      player.units.find(e => e.name == getUnit(row, cell))?.maxAmount
+                    })`
+                  }}
+                </div>
+                <div>
+                  <Button @click="buyUnit(getUnit(row, cell) as type.UnitName)">
+                    <div>buy</div>
+                    <div>{{ displayBuyCost(row, cell) }}</div>
+                  </Button>
+                </div>
               </div>
-              <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
-              <div>
-                <Button @click="buyAmountPerRound(getUnit(row, cell) as type.UnitName)">
-                  <div>increase</div>
-                  <div>
-                    {{ displayamountPerRoundCost(row, cell) }}
-                  </div>
-                </Button>
+              <div v-if="getUnit(row, cell).includes('lvl')">
+                {{ getUnit(row, cell) }}
               </div>
-              <div class="text-center">
-                {{
-                  `amount (${player.units.find(e => e.name == getUnit(row, cell))?.amount} / ${
-                    player.units.find(e => e.name == getUnit(row, cell))?.maxAmount
-                  })`
-                }}
+              <div v-if="getUnit(row, cell) == 'coming soon'">
+                {{ '<3' }}
               </div>
-              <div>
-                <Button @click="buyUnit(getUnit(row, cell) as type.UnitName)">
-                  <div>buy</div>
-                  <div>{{ displayBuyCost(row, cell) }}</div>
-                </Button>
-              </div>
-            </div>
-            <div v-if="getUnit(row, cell).includes('lvl')">
-              {{ getUnit(row, cell) }}
-            </div>
-            <div v-if="getUnit(row, cell) == 'coming soon'">
-              {{ '<3' }}
-            </div>
-            <template #button>
-              <div class="cellButton">
-                <Button class="px-2">{{ getUnit(row, cell) }}</Button>
-              </div>
-            </template>
-          </Modal>
+              <template #button>
+                <div class="cellButton">
+                  <Button class="px-2">{{ getUnit(row, cell) }}</Button>
+                </div>
+              </template>
+            </Modal>
+          </div>
         </div>
       </div>
     </div>
@@ -204,9 +208,9 @@ function getUnit(row: number, cell: number): type.UnitName | string {
 </script>
 <style lang="scss" scoped>
 $size: 20vw;
+$sizePc: 20vh;
 .row {
-  display: grid;
-  grid-template-columns: repeat(8, auto);
+  display: flex;
   .cell {
     border: 1px solid #000;
     display: flex;
@@ -214,6 +218,10 @@ $size: 20vw;
     align-items: center;
     width: $size;
     height: $size;
+    @media (min-width: 1000px) {
+      width: $sizePc;
+      height: $sizePc;
+    }
     cursor: pointer;
     background-color: gray;
     font-size: 5rem;
@@ -227,6 +235,10 @@ $size: 20vw;
   background-color: gray;
   width: $size;
   height: $size;
+  @media (min-width: 1000px) {
+    width: $sizePc;
+    height: $sizePc;
+  }
   border: 1px solid black;
 }
 .lineup :nth-child(odd).frontline,
