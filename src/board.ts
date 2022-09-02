@@ -132,7 +132,7 @@ export function applyMove(
   playerTurn?: Ref<number>,
   selectedCell?: Ref<Position>,
   moveHistory?: Ref<{ from: Position; to: Position; piece: Tile['type'] }[]>
-) {
+): Tile[][] {
   if (toRow < 0 || toCell < 0 || toRow >= board.length || toCell >= board.length) return board;
   const copyBoard = JSON.parse(JSON.stringify(board));
   if (legalMoves.find(m => m[0] == toRow && m[1] == toCell)) {
