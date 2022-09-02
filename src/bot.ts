@@ -224,12 +224,16 @@ export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: 
     returnMove = filteredMoves[Math.floor(Math.random() * filteredMoves.length)];
     console.log('preventBlunder', blunderedPieces);
   }
+  //check for trades if cant move attacked pieces
+  if (!returnMove?.target?.[0] && best) {
+    returnMove = best;
+  }
   //check if best trade is better than enemies blunder
   if (
     best &&
     blunderedPieces.length > 0 &&
     bestDifference &&
-    getPieceValue(board.value[returnMove.target[0]][returnMove.target[1]].type) < bestDifference
+    getPieceValue(board.value[returnMove.target[0]][returnMove.target[1]].type) <= bestDifference
   ) {
     returnMove = best;
   }
