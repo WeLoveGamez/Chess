@@ -211,8 +211,7 @@ $size: 12vw;
   transform: rotateX(180deg);
 
   .row {
-    display: grid;
-    grid-template-columns: repeat(8, auto);
+    display: flex;
     .cell {
       border: 1px solid #000;
       display: flex;
