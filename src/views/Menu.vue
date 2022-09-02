@@ -1,15 +1,16 @@
 <template>
   <div class="container">
-    <!-- FIXME: add variablen -->
     <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
     <div class="mt-1">
-      <!-- FIXME: add variablen -->
       <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
     <div class="mt-3">
       <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
         <div class="container">
+          <div>
+            {{ `${usedValue} /${maxValue}` }}
+          </div>
           <div class="d-flex">
             <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
               {{ `${unit.name}: ${availableNumber(unit)}` }}
@@ -20,13 +21,13 @@
           </div>
           <div class="lineup">
             <div class="d-flex">
-              <button v-for="(piece, index) of player.lineup.frontline" class="frontline" @click="clickLineup('frontline', index)">
-                {{ piece }}
+              <button v-for="index of boardSize.row" class="frontline" @click="clickLineup('frontline', index - 1)">
+                {{ player.lineup.frontline[index - 1] }}
               </button>
             </div>
             <div class="d-flex">
-              <button v-for="(piece, index) of player.lineup.backline" class="backline" @click="clickLineup('backline', index)">
-                {{ piece }}
+              <button v-for="index of boardSize.row" class="backline" @click="clickLineup('backline', index - 1)">
+                {{ player.lineup.backline[index - 1] }}
               </button>
             </div>
           </div>
@@ -42,19 +43,18 @@
     <div class="mt-1">
       <div class="row" v-for="row of 5">
         <div class="cell" v-for="cell of 5">
-          <!-- FIXME: add variablen -->
           <Modal :title="getUnit(row, cell)">
             <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
-              <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.amount}` }}</div>
+              <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
               <div>
-                <Button>
+                <Button @click="buyMaxAmount(getUnit(row, cell))">
                   <div>increase</div>
                   <div>{{ displayMaxAmountCost(row, cell) }}</div>
                 </Button>
               </div>
               <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
               <div>
-                <Button>
+                <Button @click="buyAmountPerRound(getUnit(row, cell))">
                   <div>increase</div>
                   <div>
                     {{ displayamountPerRoundCost(row, cell) }}
@@ -69,7 +69,7 @@
                 }}
               </div>
               <div>
-                <Button>
+                <Button @click="buyUnit(getUnit(row, cell))">
                   <div>buy</div>
                   <div>{{ displayBuyCost(row, cell) }}</div>
                 </Button>
@@ -95,11 +95,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
-import { player } from '../Player';
+import { player, boardSize } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
 import { createBoard, getPieceValue } from '../board';
+import { computed } from '@vue/reactivity';
 
 const selectedUnit = ref<type.UnitName>('');
 function save() {
@@ -132,13 +133,51 @@ function displayamountPerRoundCost(row: number, cell: number) {
 function displayBuyCost(row: number, cell: number) {
   return `costs: ${getPieceValue(getUnit(row, cell))}`;
 }
+function buyMaxAmount(name: type.UnitName) {
+  const unit = player.value.units.find(e => e.name == name);
+  if (!unit || unit?.maxAmount >= 100) return;
+  if (getPieceValue(name) * (unit?.maxAmount + 1) <= player.value.money) {
+    player.value.money -= getPieceValue(name) * (unit?.maxAmount + 1);
+    unit.maxAmount++;
+    setPlayer(player.value);
+  }
+}
+function buyAmountPerRound(name: type.UnitName) {
+  const unit = player.value.units.find(e => e.name == name);
+  if (!unit || unit?.amountPerRound >= unit.maxAmount) return;
+  if (getPieceValue(name) * (unit?.amountPerRound + 1) <= player.value.money) {
+    player.value.money -= getPieceValue(name) * (unit?.amountPerRound + 1);
+    unit.amountPerRound++;
+    setPlayer(player.value);
+  }
+}
+function buyUnit(name: type.UnitName) {
+  const unit = player.value.units.find(e => e.name == name);
+  if (!unit || unit?.amount >= unit.maxAmount) return;
+  if (getPieceValue(name) <= player.value.money) {
+    player.value.money -= getPieceValue(name);
+    unit.amount++;
+    setPlayer(player.value);
+  }
+}
 function removeFromLineup(line: 'frontline' | 'backline', index: number) {
   player.value.lineup[line][index] = '';
 }
 function addToLineup(line: 'frontline' | 'backline', index: number) {
+  if (usedValue.value + getPieceValue(selectedUnit.value) > maxValue.value) return;
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
 }
+const usedValue = computed(() => {
+  let used = 0;
+  for (let name of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
+    used += getPieceValue(name);
+  }
+  return used;
+});
+const maxValue = computed(() => {
+  return player.value.lvl * 3 + 4;
+});
 function getUnit(row: number, cell: number): type.UnitName | string {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';

@@ -1,6 +1,7 @@
 import { computed, Ref, ref } from 'vue';
 import { checkChecks } from './moves';
 import type { Position, DeadPiece } from './types';
+import { player, boardSize } from './Player';
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
@@ -22,88 +23,21 @@ createBoard();
 export function createBoard() {
   playerTurn.value = 1;
   deadPieces.value = [];
-  board.value = [
-    [
-      { type: 'Rook', player: 1 },
-      { type: 'Knight', player: 1 },
-      { type: 'Bishop', player: 1 },
-      { type: 'Queen', player: 1 },
-      { type: 'King', player: 1 },
-      { type: 'Bishop', player: 1 },
-      { type: 'Knight', player: 1 },
-      { type: 'Rook', player: 1 },
-    ],
-    [
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-      { type: 'Pawn', player: 1 },
-    ],
-    [
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-    ],
-    [
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-    ],
-    [
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-    ],
-    [
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-      { type: '', player: 0 },
-    ],
-    [
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-      { type: 'Pawn', player: 2 },
-    ],
-    [
-      { type: 'Rook', player: 2 },
-      { type: 'Knight', player: 2 },
-      { type: 'Bishop', player: 2 },
-      { type: 'Queen', player: 2 },
-      { type: 'King', player: 2 },
-      { type: 'Bishop', player: 2 },
-      { type: 'Knight', player: 2 },
-      { type: 'Rook', player: 2 },
-    ],
-  ];
+  const frontline = player.value.lineup.frontline.map(e => {
+    return { type: e, player: 1 } as Tile;
+  });
+  const backline = player.value.lineup.backline.map(e => {
+    return { type: e, player: 1 } as Tile;
+  });
+
+  const enemyFrontline = player.value.lineup.frontline.map(e => {
+    return { type: e, player: 2 } as Tile;
+  });
+  const enemyBackline = player.value.lineup.backline.map(e => {
+    return { type: e, player: 2 } as Tile;
+  });
+
+  board.value = [backline, frontline, new Array(backline.length).fill({ type: '', player: 0 }), enemyFrontline, enemyBackline];
 }
 export function getPieceValue(piece: Tile['type']) {
   switch (piece) {
@@ -117,7 +51,7 @@ export function getPieceValue(piece: Tile['type']) {
     case 'Rook':
       return 5;
     case 'King':
-      return 3.5;
+      return 4;
   }
   return 0;
 }

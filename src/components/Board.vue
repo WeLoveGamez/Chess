@@ -184,7 +184,8 @@ function choosePromotionPiece(piece: Tile['type']) {
 const openPromotePawnSelect = computed(() => {
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && (+rowIndex == 0 || +rowIndex == 7)) return [+rowIndex, +cellIndex];
+      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length && cell.player == 1)))
+        return [+rowIndex, +cellIndex];
     }
   }
   return null;

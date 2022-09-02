@@ -1,6 +1,6 @@
 import { getPlayer } from './API';
 import * as type from './types';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 export const player = ref(getPlayer());
 if (!player.value) {
   player.value = {
@@ -14,7 +14,49 @@ if (!player.value) {
     lineup: { frontline: ['', 'Pawn', ''], backline: ['Pawn', 'King', 'Pawn'] },
   };
 }
-
+export const boardSize = computed(() => {
+  const boardSize = {
+    row: 3,
+    cell: 5,
+  };
+  if (player.value.lvl >= 3) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 4) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 6) {
+    boardSize.cell++;
+  }
+  if (player.value.lvl >= 7) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 8) {
+    boardSize.cell++;
+  }
+  if (player.value.lvl >= 10) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 11) {
+    boardSize.cell++;
+  }
+  if (player.value.lvl >= 12) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 13) {
+    boardSize.cell++;
+  }
+  if (player.value.lvl >= 15) {
+    boardSize.row++;
+  }
+  if (player.value.lvl >= 16) {
+    boardSize.cell++;
+  }
+  if (player.value.lvl >= 17) {
+    boardSize.row++;
+  }
+  return boardSize;
+});
 export function lvlUp() {
   player.value.exp -= player.value.lvl * 10;
   player.value.lvl++;
