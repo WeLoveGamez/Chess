@@ -24,17 +24,17 @@ export function createBoard() {
   playerTurn.value = 1;
   deadPieces.value = [];
   const frontline = player.value.lineup.frontline.map(e => {
-    return { type: e, player: 1 } as Tile;
+    return { type: e, player: e ? 1 : 0 } as Tile;
   });
   const backline = player.value.lineup.backline.map(e => {
-    return { type: e, player: 1 } as Tile;
+    return { type: e, player: e ? 1 : 0 } as Tile;
   });
 
   const enemyFrontline = player.value.lineup.frontline.map(e => {
-    return { type: e, player: 2 } as Tile;
+    return { type: e, player: e ? 2 : 0 } as Tile;
   });
   const enemyBackline = player.value.lineup.backline.map(e => {
-    return { type: e, player: 2 } as Tile;
+    return { type: e, player: e ? 2 : 0 } as Tile;
   });
 
   board.value = [backline, frontline, new Array(backline.length).fill({ type: '', player: 0 }), enemyFrontline, enemyBackline];
