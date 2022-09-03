@@ -1,6 +1,6 @@
 import { computed, Ref, ref } from 'vue';
 import { checkChecks } from './moves';
-import type { Position, DeadPiece } from './types';
+import type { Position, DeadPiece, UnitName } from './types';
 import { player, boardSize } from './Player';
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const King1Checked = computed(() => checkChecks(1, board.value));
@@ -31,14 +31,45 @@ export function createBoard() {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });
 
-  const enemyFrontline = player.value.lineup.frontline.map(e => {
+  let value = 0;
+  for (let unit of frontline.concat(backline)) {
+    value += getPieceValue(unit.type);
+  }
+
+  let enemyValue = 4;
+  let enemyUnits: UnitName[] = ['King'];
+  const possibleUnits = player.value.units.filter(e => e.name != 'King');
+
+  for (let i = 1; i < frontline.length * 2; i++) {
+    if (enemyValue - value <= 2) {
+      enemyUnits[i] = 'Pawn';
+      enemyValue += getPieceValue('Pawn');
+      continue;
+    }
+    if (enemyValue <= value) {
+      enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].name;
+      enemyValue += getPieceValue(enemyUnits[i]);
+    } else {
+      enemyUnits[i] = '';
+    }
+  }
+
+  enemyUnits = shuffle(enemyUnits);
+  const enemyFrontline = enemyUnits.splice(0, frontline.length).map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
-  const enemyBackline = player.value.lineup.backline.map(e => {
+  const enemyBackline = enemyUnits.map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
 
-  board.value = [backline, frontline, new Array(backline.length).fill({ type: '', player: 0 }), enemyFrontline, enemyBackline];
+  const buildBoard = [];
+  buildBoard.push(backline);
+  buildBoard.push(frontline);
+  for (let i = 0; i < boardSize.value.cell - 4; i++) buildBoard.push(new Array(backline.length).fill({ type: '', player: 0 }));
+  buildBoard.push(enemyFrontline);
+  buildBoard.push(enemyBackline);
+
+  board.value = buildBoard;
 }
 export function getPieceValue(piece: Tile['type']) {
   switch (piece) {
@@ -107,4 +138,23 @@ export function applyMove(
   }
 
   return copyBoard;
+}
+function shuffle(array: any[]) {
+  let counter = array.length;
+
+  // While there are elements in the array
+  while (counter > 0) {
+    // Pick a random index
+    let index = Math.floor(Math.random() * counter);
+
+    // Decrease counter by 1
+    counter--;
+
+    // And swap the last element with it
+    let temp = array[counter];
+    array[counter] = array[index];
+    array[index] = temp;
+  }
+
+  return array;
 }
