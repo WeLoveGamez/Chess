@@ -89,6 +89,7 @@ import {
   deadPieces,
   getPieceValue,
   lastMovedCell,
+  openPromotePawnSelect,
 } from '../board';
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
