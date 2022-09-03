@@ -205,17 +205,6 @@ function choosePromotionPiece(piece: Tile['type']) {
   }
 }
 
-const openPromotePawnSelect = computed(() => {
-  if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
-  for (let [rowIndex, row] of Object.entries(board.value)) {
-    for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
-        return [+rowIndex, +cellIndex];
-    }
-  }
-  return null;
-});
-
 const UNICODE_PIECES = {
   King: 0x2654,
   Queen: 0x2655,

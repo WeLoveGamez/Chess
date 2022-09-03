@@ -18,6 +18,7 @@ export const playerTurn = ref<1 | 2>(1);
 
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
 export const openPromotePawnSelect = computed(() => {
+  if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
       if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
