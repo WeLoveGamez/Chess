@@ -173,7 +173,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
   }
 }
 function botMove() {
-  if (openPromotePawnSelect.value) return;
+  if (openPromotePawnSelect.value || checkMate.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
   if (!(typeof move.piece[0] == 'number') || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
