@@ -2,6 +2,7 @@ import { computed, Ref, ref } from 'vue';
 import { checkChecks } from './moves';
 import type { Position, DeadPiece, UnitName } from './types';
 import { player, boardSize } from './Player';
+import { botPlayer } from './bot';
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
@@ -16,13 +17,14 @@ export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as c
 
 export const selectedCell = ref<Position>([-1, -1]);
 export const playerTurn = ref<1 | 2>(1);
-
+export const autoPlay = ref(false);
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
 export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
 createBoard();
 export function createBoard() {
   playerTurn.value = 1;
+  botPlayer.value = autoPlay.value ? 1 : 2;
   deadPieces.value = [];
   moveHistory.value = [];
   const frontline = player.value.lineup.frontline.map(e => {

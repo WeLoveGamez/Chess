@@ -92,6 +92,7 @@ import {
   deadPieces,
   getPieceValue,
   lastMovedCell,
+  autoPlay,
 } from '../board';
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
@@ -103,7 +104,7 @@ import NoSleep from 'nosleep.js';
 
 const noSleep = new NoSleep();
 noSleep.enable();
-const autoPlay = ref(false);
+
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
@@ -141,7 +142,6 @@ function calcAfterGame() {
   noSleep.disable();
   setPlayer(player.value);
   if (autoPlay.value) {
-    closeModal();
     startGame();
   }
 }
@@ -157,7 +157,6 @@ function goToMenu() {
 }
 function startGame() {
   noSleep.enable();
-  botPlayer.value = autoPlay.value ? 1 : 2;
   createBoard();
 }
 
@@ -189,7 +188,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
 function botMove() {
   if (openPromotePawnSelect.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
-  if (!(typeof move.piece[0] == 'number') || !(typeof move.target[0] == 'number')) return;
+  if ((move && !(typeof move.piece[0] == 'number')) || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
   board.value = applyMove(
     move.piece[0],

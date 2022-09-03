@@ -108,7 +108,7 @@ import { player, boardSize } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
-import { createBoard, getPieceValue } from '../board';
+import { autoPlay, createBoard, getPieceValue } from '../board';
 import { computed } from '@vue/reactivity';
 import { botPlayer } from '../bot';
 
@@ -118,7 +118,7 @@ function save() {
 }
 function play() {
   if (!haveAllNeedUnits) return;
-  botPlayer.value = 2;
+  autoPlay.value = false;
   createBoard();
   router.push({ name: 'Board' });
 }
