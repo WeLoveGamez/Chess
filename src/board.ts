@@ -34,12 +34,8 @@ export function createBoard() {
   playerTurn.value = 1;
   deadPieces.value = [];
   moveHistory.value = [];
-  const frontline = player.value.lineup.frontline.map(e => {
-    return { type: e, player: e ? 1 : 0 } as Tile;
-  });
-  const backline = player.value.lineup.backline.map(e => {
-    return { type: e, player: e ? 1 : 0 } as Tile;
-  });
+  const frontline: Tile[] = player.value.lineup.frontline.map(e => ({ type: e, player: e ? 1 : 0 }));
+  const backline: Tile[] = player.value.lineup.backline.map(e => ({ type: e, player: e ? 1 : 0 }));
 
   let value = 0;
   for (let unit of frontline.concat(backline)) {
@@ -63,12 +59,21 @@ export function createBoard() {
       enemyUnits[i] = '';
     }
   }
-
   enemyUnits = shuffle(enemyUnits);
-  const enemyFrontline = enemyUnits.splice(0, frontline.length).map(e => {
+  let index = enemyUnits.findIndex(e => e == 'King') + 1;
+  let front, back;
+  if (index > enemyUnits.length / 2) {
+    back = enemyUnits.splice(enemyUnits.length / 2);
+    front = enemyUnits;
+  } else {
+    front = enemyUnits.splice(enemyUnits.length / 2);
+    back = enemyUnits;
+  }
+
+  const enemyFrontline = front.map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
-  const enemyBackline = enemyUnits.map(e => {
+  const enemyBackline = back.map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
 

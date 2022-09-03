@@ -1,7 +1,7 @@
 <template>
   <main class="container flex-column" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
-      <div class="board flex-row">
+      <div class="board">
         <div class="row" v-for="(row, rowIndex) in board">
           <div
             class="cell"
