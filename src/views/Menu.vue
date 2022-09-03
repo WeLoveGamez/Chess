@@ -199,7 +199,7 @@ const usedValue = computed(() => {
   return used;
 });
 const maxValue = computed(() => {
-  return player.value.lvl * 5 + 4;
+  return player.value.lvl * 3 + 6;
 });
 function getUnit(row: number, cell: number): type.UnitName | string {
   if (row == 1 && cell == 1) return 'King';

@@ -25,9 +25,8 @@
       </div>
     </div>
     <aside>
-      <div>
-        <span class="text-center">Play vs Bot:</span>
-        <Button @click="bot = !bot">{{ bot }}</Button>
+      <div class="mt-1">
+        <Button @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
       </div>
       <div>
         <Button @click="goToMenu()">Menu</Button>
@@ -175,7 +174,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
 function botMove() {
   if (openPromotePawnSelect.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
-  if (!move.piece[0] || !move.target[0]) return;
+  if (!(typeof move.piece[0] == 'number') || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
   board.value = applyMove(
     move.piece[0],
@@ -190,6 +189,10 @@ function botMove() {
   );
   if (openPromotePawnSelect.value) {
     choosePromotionPiece('Queen');
+  }
+  if (bot.value) {
+    botPlayer.value = botPlayer.value == 1 ? 2 : 1;
+    setTimeout(botMove, 500);
   }
 }
 
