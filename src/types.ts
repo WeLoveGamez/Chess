@@ -1,4 +1,9 @@
+export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
+
+export type UnitName = typeof PIECES[number] | '';
+
 export type Position = [number, number];
+
 export interface Player {
   exp: number;
   money: number;
@@ -6,7 +11,6 @@ export interface Player {
   units: Unit[];
   lineup: Lineup;
 }
-export type UnitName = 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King' | 'Bishop' | 'Knight' | 'Pawn' | '';
 export interface DeadPiece {
   player: 1 | 2;
   name: UnitName;
@@ -21,4 +25,9 @@ export interface Unit {
 export interface Lineup {
   frontline: UnitName[];
   backline: UnitName[];
+}
+
+export interface Tile {
+  type: UnitName | '';
+  player: 1 | 2 | 0;
 }

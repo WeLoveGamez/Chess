@@ -1,5 +1,4 @@
-import type { Tile } from './board';
-import type { Position } from './types';
+import type { Position, Tile } from './types';
 import { applyMove, moveHistory, King1Checked, King2Checked } from './board';
 
 export function checkChecks(player: 1 | 2, board: Tile[][]) {

@@ -1,6 +1,7 @@
 import type { Position } from './types';
-import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard, openPromotePawnSelect } from './board';
+import { board, applyMove, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard, openPromotePawnSelect } from './board';
 import { checkAllLegalMoves, checkLegalMoves, checkChecks } from './moves';
+import { getPieceValue } from './utils';
 import { computed, ref } from 'vue';
 
 export const bot = ref(true);

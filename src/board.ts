@@ -1,21 +1,12 @@
 import { computed, Ref, ref } from 'vue';
 import { checkChecks } from './moves';
-import type { Position, DeadPiece, UnitName } from './types';
+import type { Position, DeadPiece, UnitName, Tile } from './types';
 import { player, boardSize } from './Player';
-export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
+import { getPieceValue } from './utils';
+
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
 export const lastMovedCell = computed(() => moveHistory.value.at(-1));
-
-export interface Tile {
-  type: typeof PIECES[number] | '';
-  player: 1 | 2 | 0;
-}
-export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
-
-export const selectedCell = ref<Position>([-1, -1]);
-export const playerTurn = ref<1 | 2>(1);
-
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
 export const openPromotePawnSelect = computed(() => {
   if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
@@ -27,8 +18,13 @@ export const openPromotePawnSelect = computed(() => {
   }
   return null;
 });
+
+export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
+export const selectedCell = ref<Position>([-1, -1]);
+export const playerTurn = ref<1 | 2>(1);
 export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
+
 createBoard();
 export function createBoard() {
   playerTurn.value = 1;
@@ -59,7 +55,7 @@ export function createBoard() {
       enemyUnits[i] = '';
     }
   }
-  enemyUnits = shuffle(enemyUnits);
+  enemyUnits = enemyUnits.shuffle();
   let index = enemyUnits.findIndex(e => e == 'King') + 1;
   let front, back;
   if (index > enemyUnits.length / 2) {
@@ -85,22 +81,6 @@ export function createBoard() {
   buildBoard.push(enemyBackline);
 
   board.value = buildBoard;
-}
-export function getPieceValue(piece: Tile['type']) {
-  switch (piece) {
-    case 'Bishop':
-    case 'Knight':
-      return 3;
-    case 'Pawn':
-      return 1;
-    case 'Queen':
-      return 9;
-    case 'Rook':
-      return 5;
-    case 'King':
-      return 4;
-  }
-  return 0;
 }
 
 export function applyMove(
@@ -153,23 +133,4 @@ export function applyMove(
   }
 
   return copyBoard;
-}
-function shuffle(array: any[]) {
-  let counter = array.length;
-
-  // While there are elements in the array
-  while (counter > 0) {
-    // Pick a random index
-    let index = Math.floor(Math.random() * counter);
-
-    // Decrease counter by 1
-    counter--;
-
-    // And swap the last element with it
-    let temp = array[counter];
-    array[counter] = array[index];
-    array[index] = temp;
-  }
-
-  return array;
 }

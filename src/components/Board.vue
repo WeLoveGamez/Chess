@@ -74,29 +74,30 @@
   </Modal>
 </template>
 <script setup lang="ts">
-import { computed, ref } from '@vue/reactivity';
+import { ref } from 'vue';
+import router from '../router';
+import { Modal, Button, handleClick } from 'custom-mbd-components';
+
+import type { Tile } from '../types';
+
+import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
+import { lvlUp, player } from '../Player';
+import { setPlayer } from '../API';
+import { getPieceValue } from '../utils';
 import {
   board,
-  Tile,
   applyMove,
   moveHistory,
   King1Checked,
   King2Checked,
-  PIECES,
   selectedCell,
   playerTurn,
   createBoard,
   deadPieces,
-  getPieceValue,
   lastMovedCell,
   openPromotePawnSelect,
 } from '../board';
 
-import { Modal, Button, handleClick } from 'custom-mbd-components';
-import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { lvlUp, player } from '../Player';
-import { setPlayer } from '../API';
-import router from '../router';
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
