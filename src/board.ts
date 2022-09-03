@@ -6,6 +6,7 @@ export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
 export const lastMovedCell = computed(() => moveHistory.value.at(-1));
+export const stalemateCheck = ref(0);
 
 export interface Tile {
   type: typeof PIECES[number] | '';
@@ -130,7 +131,11 @@ export function applyMove(
 
     if (playerTurn && selectedCell) {
       const player = board[toRow][toCell].player;
-      if (player) deadPieces.value.push({ name: board[toRow][toCell].type, player: player });
+      stalemateCheck.value++;
+      if (player) {
+        deadPieces.value.push({ name: board[toRow][toCell].type, player: player });
+        stalemateCheck.value = 0;
+      }
       moveHistory?.value.push({ from: [fromRow, fromCell], to: [toRow, toCell], piece: board[fromRow][fromCell].type });
       playerTurn.value = playerTurn.value == 1 ? 2 : 1;
       selectedCell.value = [-1, -1];

@@ -29,6 +29,9 @@
         <Button @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
       </div>
       <div>
+        <Button @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
+      </div>
+      <div>
         <Button @click="goToMenu()">Menu</Button>
       </div>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
@@ -96,6 +99,11 @@ import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPiece
 import { lvlUp, player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
+import NoSleep from 'nosleep.js';
+
+const noSleep = new NoSleep();
+noSleep.enable();
+const autoPlay = ref(false);
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
@@ -130,7 +138,12 @@ function calcAfterGame() {
     piece.amount += piece.amountPerRound;
     if (piece.amount > piece.maxAmount) piece.amount = piece.maxAmount;
   }
+  noSleep.disable();
   setPlayer(player.value);
+  if (autoPlay.value) {
+    closeModal();
+    startGame();
+  }
 }
 function resetRewards() {
   rewards.value = { money: 0, exp: 0 };
@@ -143,6 +156,8 @@ function goToMenu() {
   router.push({ name: 'Menu' });
 }
 function startGame() {
+  noSleep.enable();
+  botPlayer.value = autoPlay.value ? 1 : 2;
   createBoard();
 }
 
@@ -188,7 +203,7 @@ function botMove() {
     moveHistory
   );
   if (openPromotePawnSelect.value) {
-    choosePromotionPiece('Queen');
+    choosePromotionPiece(player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').sort((a, b) => b.value - a.value)[0].name);
   }
   if (bot.value) {
     botPlayer.value = botPlayer.value == 1 ? 2 : 1;

@@ -110,6 +110,7 @@ import router from '../router';
 import * as type from '../types';
 import { createBoard, getPieceValue } from '../board';
 import { computed } from '@vue/reactivity';
+import { botPlayer } from '../bot';
 
 const selectedUnit = ref<type.UnitName>('');
 function save() {
@@ -117,6 +118,7 @@ function save() {
 }
 function play() {
   if (!haveAllNeedUnits) return;
+  botPlayer.value = 2;
   createBoard();
   router.push({ name: 'Board' });
 }
