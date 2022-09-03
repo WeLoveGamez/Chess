@@ -231,7 +231,7 @@ export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: 
         }
       }
     }
-    {
+    safeStrongestPiece: {
       let strongest: Position;
       let value = 0;
       for (let move of blunderedPieces) {
@@ -289,12 +289,12 @@ export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: 
     returnMove = checkmate;
     console.log('checkmate');
   }
+  if (restrictedMove) return restrictedMove;
   //get random move without blunders if nothing else works
   if (!returnMove) {
     console.log('no returnMove found');
     returnMove = getRandomMove(coveredFields, allMoves);
   }
-  if (restrictedMove) return restrictedMove;
   return returnMove;
 }
 function getRandomMove(coveredFields: Position[], allMoves: Move[]) {
