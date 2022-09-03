@@ -140,12 +140,12 @@ function clickLineup(line: 'frontline' | 'backline', index: number) {
 function displayMaxAmountCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
   const maxAmount = player.value.units.find(e => e.name == name)?.maxAmount;
-  if (maxAmount) return `costs: ${(maxAmount + 1) * getPieceValue(name)}`;
+  if (typeof maxAmount == 'number') return `costs: ${(maxAmount + 1) * getPieceValue(name)}`;
 }
 function displayamountPerRoundCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
   const amountPerRound = player.value.units.find(e => e.name == name)?.maxAmount;
-  if (amountPerRound) return `costs: ${(amountPerRound + 1) * getPieceValue(name)}`;
+  if (typeof amountPerRound == 'number') return `costs: ${(amountPerRound + 1) * getPieceValue(name)}`;
 }
 function displayBuyCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
