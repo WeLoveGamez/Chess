@@ -1,5 +1,4 @@
 import { getPlayer } from './API';
-import * as type from './types';
 import { computed, ref } from 'vue';
 export const player = ref(getPlayer());
 if (!player.value) {
