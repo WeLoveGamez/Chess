@@ -107,6 +107,18 @@ function calcAfterGame() {
     for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
       rewards.value.exp += getPieceValue(piece.type);
     }
+  if (checkMate.value.includes('stalemate')) {
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      rewards.value.exp += getPieceValue(piece.type) / 2;
+    }
+    rewards.value.exp = Math.round(rewards.value.exp);
+  }
+  if (checkMate.value.includes('black')) {
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      rewards.value.exp += getPieceValue(piece.type) / 4;
+    }
+    rewards.value.exp = Math.round(rewards.value.exp);
+  }
   player.value.exp += rewards.value.exp;
   if (player.value.exp >= player.value.lvl * 10) {
     lvlUp();
