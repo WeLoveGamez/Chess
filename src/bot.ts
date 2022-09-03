@@ -1,5 +1,5 @@
 import type { Position } from './types';
-import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard } from './board';
+import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard, openPromotePawnSelect } from './board';
 import { checkAllLegalMoves, checkLegalMoves, checkChecks } from './moves';
 import { computed, ref } from 'vue';
 
@@ -300,11 +300,11 @@ export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: 
 function getRandomMove(coveredFields: Position[], allMoves: Move[]) {
   let returnMove: Move;
   let rndMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
-  let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
-  returnMove = move;
-
-  if (!move?.piece[0] || !move?.target[0]) {
+  if (rndMoves.length == 0) {
     returnMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+  } else {
+    let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
+    returnMove = move;
   }
   console.log('RandomMove');
   return returnMove;
@@ -329,7 +329,8 @@ export const checkMate = computed(() =>
     ? 'checkmate for white'
     : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
     ? 'checkmate for black'
-    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0) || piecesOnBoard.value == 2
+    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && openPromotePawnSelect.value) ||
+      piecesOnBoard.value == 2
     ? 'stalemate'
     : ''
 );

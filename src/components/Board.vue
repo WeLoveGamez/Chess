@@ -90,6 +90,7 @@ import {
   deadPieces,
   getPieceValue,
   lastMovedCell,
+  openPromotePawnSelect,
 } from '../board';
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
@@ -175,7 +176,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
 function botMove() {
   if (openPromotePawnSelect.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
-  if (!move.piece[0] || !move.target[0]) return;
+  if (!move || !move.piece[0] || !move.target[0]) return;
   selectedCell.value = move.piece;
   board.value = applyMove(
     move.piece[0],
@@ -200,16 +201,6 @@ function choosePromotionPiece(piece: Tile['type']) {
     botMove();
   }
 }
-
-const openPromotePawnSelect = computed(() => {
-  for (let [rowIndex, row] of Object.entries(board.value)) {
-    for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
-        return [+rowIndex, +cellIndex];
-    }
-  }
-  return null;
-});
 
 const UNICODE_PIECES = {
   King: 0x2654,
