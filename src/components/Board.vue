@@ -80,7 +80,7 @@ import { Modal, Button, handleClick } from 'custom-mbd-components';
 
 import type { Tile } from '../types';
 
-import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
+import { bot, getGoodBotMove, botPlayer } from '../bot';
 import { lvlUp, player } from '../Player';
 import { setPlayer } from '../API';
 import { getPieceValue } from '../utils';
@@ -96,6 +96,9 @@ import {
   deadPieces,
   lastMovedCell,
   openPromotePawnSelect,
+  checkMate,
+  legalMoves,
+  moveableBotPieces,
 } from '../board';
 
 const rewards = ref({ money: 0, exp: 0 });

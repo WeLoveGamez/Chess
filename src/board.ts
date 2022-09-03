@@ -1,13 +1,18 @@
 import { computed, Ref, ref } from 'vue';
-import { checkChecks } from './moves';
+import { checkAllLegalMoves, checkChecks, checkLegalMoves } from './moves';
 import type { Position, DeadPiece, UnitName, Tile } from './types';
 import { player, boardSize } from './Player';
 import { getPieceValue } from './utils';
+import { botPlayer, getMoveableBotPieces } from './bot';
 
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
 export const lastMovedCell = computed(() => moveHistory.value.at(-1));
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
+export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
+export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
+export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
+
 export const openPromotePawnSelect = computed(() => {
   if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
   for (let [rowIndex, row] of Object.entries(board.value)) {
@@ -18,6 +23,16 @@ export const openPromotePawnSelect = computed(() => {
   }
   return null;
 });
+export const checkMate = computed(() =>
+  King2Checked.value.length > 0 && AllLegalMoves.value.length == 0
+    ? 'checkmate for white'
+    : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
+    ? 'checkmate for black'
+    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
+      piecesOnBoard.value == 2
+    ? 'stalemate'
+    : ''
+);
 
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const selectedCell = ref<Position>([-1, -1]);

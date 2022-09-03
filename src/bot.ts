@@ -1,4 +1,4 @@
-import type { Position } from './types';
+import type { Move, Position } from './types';
 import { board, applyMove, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard, openPromotePawnSelect } from './board';
 import { checkAllLegalMoves, checkLegalMoves, checkChecks } from './moves';
 import { getPieceValue } from './utils';
@@ -6,7 +6,6 @@ import { computed, ref } from 'vue';
 
 export const bot = ref(true);
 export const botPlayer = ref<1 | 2>(2);
-export type Move = { piece: Position; target: Position };
 
 export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: Move[]): Move {
   let returnMove: null | Move = null;
@@ -321,17 +320,3 @@ export function getMoveableBotPieces(botPlayer: number) {
   }
   return pieces;
 }
-
-export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
-export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
-export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
-export const checkMate = computed(() =>
-  King2Checked.value.length > 0 && AllLegalMoves.value.length == 0
-    ? 'checkmate for white'
-    : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
-    ? 'checkmate for black'
-    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
-      piecesOnBoard.value == 2
-    ? 'stalemate'
-    : ''
-);

@@ -3,6 +3,7 @@ export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as c
 export type UnitName = typeof PIECES[number] | '';
 
 export type Position = [number, number];
+export type Move = { piece: Position; target: Position };
 
 export interface Player {
   exp: number;
