@@ -144,7 +144,7 @@ function displayMaxAmountCost(row: number, cell: number) {
 }
 function displayamountPerRoundCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
-  const amountPerRound = player.value.units.find(e => e.name == name)?.maxAmount;
+  const amountPerRound = player.value.units.find(e => e.name == name)?.amountPerRound;
   if (typeof amountPerRound == 'number') return `costs: ${(amountPerRound + 1) * getPieceValue(name)}`;
 }
 function displayBuyCost(row: number, cell: number) {
