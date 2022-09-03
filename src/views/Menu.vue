@@ -48,7 +48,10 @@
         <div class="row" v-for="row of 5">
           <div class="cell" v-for="cell of 5">
             <Modal :title="getUnit(row, cell)">
-              <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl')">
+              <div
+                class="container"
+                v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl') && getUnit(row, cell) != 'King'"
+              >
                 <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
                 <div>
                   <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitName)">
@@ -82,6 +85,7 @@
               <div v-if="getUnit(row, cell).includes('lvl')">
                 {{ getUnit(row, cell) }}
               </div>
+              <div v-if="getUnit(row, cell) == 'King'">You are King</div>
               <div v-if="getUnit(row, cell) == 'coming soon'">
                 {{ '<3' }}
               </div>
@@ -183,6 +187,7 @@ function removeFromLineup(line: 'frontline' | 'backline', index: number) {
 }
 function addToLineup(line: 'frontline' | 'backline', index: number) {
   if (usedValue.value + getPieceValue(selectedUnit.value) > maxValue.value) return;
+  if (player.value.units.find(e => e.name == selectedUnit.value)!.amount <= 0) return;
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
 }
