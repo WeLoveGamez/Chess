@@ -329,7 +329,7 @@ export const checkMate = computed(() =>
     ? 'checkmate for white'
     : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
     ? 'checkmate for black'
-    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && openPromotePawnSelect.value) ||
+    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
       piecesOnBoard.value == 2
     ? 'stalemate'
     : ''
