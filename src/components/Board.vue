@@ -40,8 +40,8 @@
           <div>AllLegalMoves:{{ AllLegalMoves }}</div> -->
       <div>checkMate:{{ checkMate }}</div>
       <div v-if="openPromotePawnSelect" class="promotions">
-        <div @click.stop="choosePromotionPiece(piece)" v-for="piece of PIECES.filter(p => p != 'King' && p != 'Pawn')">
-          {{ getUnicodePiece(piece) }}
+        <div @click.stop="choosePromotionPiece(piece.name)" v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn')">
+          {{ getUnicodePiece(piece.name) }}
         </div>
       </div>
       <div>
@@ -202,6 +202,7 @@ function choosePromotionPiece(piece: Tile['type']) {
 }
 
 const openPromotePawnSelect = computed(() => {
+  if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
       if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))

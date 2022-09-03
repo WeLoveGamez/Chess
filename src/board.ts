@@ -41,15 +41,15 @@ export function createBoard() {
   const possibleUnits = player.value.units.filter(e => e.name != 'King');
 
   for (let i = 1; i < frontline.length * 2; i++) {
-    if (enemyValue - value <= 2) {
-      enemyUnits[i] = 'Pawn';
-      enemyValue += getPieceValue('Pawn');
-      continue;
-    }
     if (enemyValue <= value) {
       enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].name;
       enemyValue += getPieceValue(enemyUnits[i]);
     } else {
+      if (enemyValue - value <= 2) {
+        enemyUnits[i] = 'Pawn';
+        enemyValue += getPieceValue('Pawn');
+        continue;
+      }
       enemyUnits[i] = '';
     }
   }
