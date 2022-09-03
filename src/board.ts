@@ -23,6 +23,7 @@ createBoard();
 export function createBoard() {
   playerTurn.value = 1;
   deadPieces.value = [];
+  moveHistory.value = [];
   const frontline = player.value.lineup.frontline.map(e => {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });

@@ -61,16 +61,16 @@ export function lvlUp() {
   player.value.exp -= player.value.lvl * 10;
   player.value.lvl++;
   if (player.value.lvl >= 2) {
-    if (!player.value.units.find(e => e.name == 'Rook'))
-      player.value.units.push({ name: 'Rook', value: 5, maxAmount: 0, amount: 0, amountPerRound: 0 });
-  }
-  if (player.value.lvl >= 5) {
     if (!player.value.units.find(e => e.name == 'Bishop'))
       player.value.units.push({ name: 'Bishop', value: 3, maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
-  if (player.value.lvl >= 9) {
+  if (player.value.lvl >= 5) {
     if (!player.value.units.find(e => e.name == 'Knight'))
       player.value.units.push({ name: 'Knight', value: 3, maxAmount: 0, amount: 0, amountPerRound: 0 });
+  }
+  if (player.value.lvl >= 9) {
+    if (!player.value.units.find(e => e.name == 'Rook'))
+      player.value.units.push({ name: 'Rook', value: 5, maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
   if (player.value.lvl >= 14) {
     if (!player.value.units.find(e => e.name == 'Queen'))

@@ -194,14 +194,14 @@ const usedValue = computed(() => {
   return used;
 });
 const maxValue = computed(() => {
-  return player.value.lvl * 3 + 4;
+  return player.value.lvl * 5 + 4;
 });
 function getUnit(row: number, cell: number): type.UnitName | string {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';
-  if (row == 1 && cell == 3) return player.value.lvl >= 2 ? 'Rook' : 'need lvl 2';
-  if (row == 1 && cell == 4) return player.value.lvl >= 5 ? 'Bishop' : 'need lvl 5';
-  if (row == 1 && cell == 5) return player.value.lvl >= 9 ? 'Knight' : 'need lvl 9';
+  if (row == 1 && cell == 3) return player.value.lvl >= 2 ? 'Bishop' : 'need lvl 2';
+  if (row == 1 && cell == 4) return player.value.lvl >= 5 ? 'Knight' : 'need lvl 5';
+  if (row == 1 && cell == 5) return player.value.lvl >= 9 ? 'Rook' : 'need lvl 9';
   if (row == 2 && cell == 1) return player.value.lvl >= 14 ? 'Queen' : 'need lvl 14';
   return 'coming soon';
 }

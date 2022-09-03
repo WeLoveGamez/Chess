@@ -263,7 +263,7 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
 function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 | 2, fromRow: number, fromCell: number): Position[] {
   const checks: Position[] = [];
   if (!board[fromRow][fromCell].type) return [];
-  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= board.length - 1 && m[1] <= board.length - 1 && 0 <= m[1]);
+  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= board.length - 1 && m[1] <= board[0].length - 1 && 0 <= m[1]);
   for (let action of legalMoves) {
     if (checkChecks(player, applyMove(fromRow, fromCell, action[0], action[1], legalMoves, board)).length > 0) {
       checks.push(action);
