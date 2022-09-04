@@ -1,5 +1,5 @@
 <template>
-  <main class="container flex-column" @click="selectedCell = [-1, -1]">
+  <main class="container flex-column p-0 m-0" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
       <div class="board">
         <div class="row g-0" v-for="(row, rowIndex) in board">
@@ -23,28 +23,27 @@
         </div>
       </div>
     </div>
-    <div class="promotions mt-2">
-      <div
-        v-if="openPromotePawnSelect"
-        @click.stop="choosePromotionPiece(piece.name)"
-        v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
-      >
-        {{ getUnicodePiece(piece.name) }}
+
+    <div
+      class="promotions mt-2"
+      v-if="openPromotePawnSelect"
+      @click.stop="choosePromotionPiece(piece.name)"
+      v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
+    >
+      {{ getUnicodePiece(piece.name) }}
+    </div>
+    <div class="aside">
+      <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
+      <div class="mt-1">
+        <Button class="button" @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
+      </div>
+      <div>
+        <Button class="button" @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
+      </div>
+      <div>
+        <Button class="button" @click="goToMenu()">Menu</Button>
       </div>
     </div>
-    <aside>
-      <div class="mt-1">
-        <Button @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
-      </div>
-      <div>
-        <Button @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
-      </div>
-      <div>
-        <Button @click="goToMenu()">Menu</Button>
-      </div>
-      <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
-      <div>checkMate:{{ checkMate }}</div>
-    </aside>
   </main>
   <Modal
     :title="checkMate"
@@ -62,11 +61,24 @@
       <div></div>
     </template>
   </Modal>
+  <!-- <Alert class="my-2 px-3" :timer="2000" alertClass="alert-success" :show="showAlert">
+    <div class="card border-0">
+      <div class="card-title py-1">{{ checkMate }}</div>
+      <div class="card-body py-1 d-flex justify-content-around">
+        <div>{{ `Money: ${rewards.money}` }}</div>
+        <div>{{ `Exp: ${rewards.exp}` }}</div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <div class="m-1 w-50"><Button class="affirmButton" @click="closeModal()">Play Again</Button></div>
+        <div class="m-1 w-50"><Button class="affirmButton" @click="goToMenu()">Menu</Button></div>
+      </div>
+    </div>
+  </Alert> -->
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import router from '../router';
-import { Modal, Button, handleClick } from 'custom-mbd-components';
+import { Modal, Button, handleClick, Alert } from 'custom-mbd-components';
 import type { Tile } from '../types';
 import { bot, getGoodBotMove, botPlayer } from '../bot';
 import { lvlUp, player, haveAllNeedUnits } from '../Player';
@@ -91,8 +103,18 @@ import {
   autoPlay,
 } from '../board';
 
+// const showValue = ref(false);
+// const showAlert = ref({ show: showValue.value });
+
 const noSleep = new NoSleep();
 noSleep.enable();
+
+watchEffect(() => {
+  if (checkMate.value) {
+    calcAfterGame();
+    // showValue.value = true;
+  }
+});
 
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
@@ -255,8 +277,17 @@ $sizePc: calc((100 / v-bind('board.length')) * 1vh);
   }
 }
 
-aside * {
-  margin-bottom: 0.25rem;
+.aside {
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  width: calc(100% - 32px);
+  * {
+    margin-bottom: 0.25rem;
+  }
+  .button {
+    width: 100%;
+  }
 }
 
 .row:nth-child(odd) .cell:nth-child(even) {
