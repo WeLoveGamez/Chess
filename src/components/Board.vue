@@ -65,6 +65,7 @@
     affirm-alt-text="Menu"
     affirm-text="Play Again"
     :affirm-action="closeModal"
+    affirm-class="affirmButton"
     :affirm-alt-action="goToMenu"
     :model-value="!!checkMate"
     @update:model-value="show => (show ? calcAfterGame() : closeModal())"
@@ -142,7 +143,10 @@ function calcAfterGame() {
   noSleep.disable();
   setPlayer(player.value);
   if (autoPlay.value) {
-    startGame();
+    const collection = document.getElementsByClassName('affirmButton');
+    setTimeout(() => {
+      collection[0].click();
+    }, 2000);
   }
 }
 function resetRewards() {
