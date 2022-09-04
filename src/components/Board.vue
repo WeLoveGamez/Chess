@@ -28,6 +28,19 @@
       <div class="mt-1">
         <Button @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
       </div>
+      <div v-if="bot && !activeGame">
+        <Button
+          @click="
+            () => {
+              botPlayer = 1;
+              botMove();
+              activeGame = true;
+            }
+          "
+        >
+          start
+        </Button>
+      </div>
       <div>
         <Button @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
       </div>
@@ -111,6 +124,8 @@ import {
 const noSleep = new NoSleep();
 noSleep.enable();
 
+const activeGame = ref(false);
+
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
@@ -153,6 +168,7 @@ function calcAfterGame() {
       (collection[0] as HTMLElement).click();
     }, 2000);
   }
+  activeGame.value = false;
   setPlayer(player.value);
 }
 function resetRewards() {
@@ -169,6 +185,7 @@ function startGame() {
   if (!haveAllNeedUnits) goToMenu();
   noSleep.enable();
   createBoard();
+  activeGame.value = true;
   if (autoPlay.value) setTimeout(botMove, 500);
 }
 

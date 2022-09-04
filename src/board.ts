@@ -1,7 +1,7 @@
 import { computed, Ref, ref } from 'vue';
 import { checkAllLegalMoves, checkChecks, checkLegalMoves } from './moves';
 import type { Position, DeadPiece, UnitName, Tile } from './types';
-import { player, boardSize } from './Player';
+import { player, boardSize, maxValue } from './Player';
 import { getPieceValue } from './utils';
 import { botPlayer, getMoveableBotPieces } from './bot';
 
@@ -62,21 +62,16 @@ export function createBoard() {
     backline.push({ type: '', player: 0 });
   }
 
-  let value = 0;
-  for (let unit of frontline.concat(backline)) {
-    value += getPieceValue(unit.type);
-  }
-
   let enemyValue = 4;
   let enemyUnits: UnitName[] = ['King'];
   const possibleUnits = player.value.units.filter(e => e.name != 'King');
 
   for (let i = 1; i < frontline.length * 2; i++) {
-    if (enemyValue <= value) {
+    if (enemyValue <= maxValue.value) {
       enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].name;
       enemyValue += getPieceValue(enemyUnits[i]);
     } else {
-      if (enemyValue - value <= 2) {
+      if (enemyValue - maxValue.value <= 2) {
         enemyUnits[i] = 'Pawn';
         enemyValue += getPieceValue('Pawn');
         continue;
