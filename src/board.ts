@@ -33,6 +33,10 @@ export function createBoard() {
   const backline = player.value.lineup.backline.map(e => {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });
+  for (let i = 0; i < boardSize.value.row - frontline.length; i++) {
+    frontline.push({ type: '', player: 0 });
+    backline.push({ type: '', player: 0 });
+  }
 
   let value = 0;
   for (let unit of frontline.concat(backline)) {
