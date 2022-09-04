@@ -146,13 +146,14 @@ function calcAfterGame() {
     if (piece.amount > piece.maxAmount) piece.amount = piece.maxAmount;
   }
   noSleep.disable();
-  setPlayer(player.value);
-  if (autoPlay.value) {
+  if (autoPlay.value && player.value.money >= 5) {
+    player.value.money -= 5;
     const collection = document.getElementsByClassName('affirmButton');
     setTimeout(() => {
       collection[0].click();
     }, 2000);
   }
+  setPlayer(player.value);
 }
 function resetRewards() {
   rewards.value = { money: 0, exp: 0 };
@@ -168,6 +169,7 @@ function startGame() {
   if (!haveAllNeedUnits) goToMenu();
   noSleep.enable();
   createBoard();
+  if (autoPlay.value) setTimeout(botMove, 500);
 }
 
 function cellClicked(rowIndex: number, cellIndex: number) {
