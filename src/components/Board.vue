@@ -210,9 +210,7 @@ function botMove() {
     moveHistory
   );
   if (openPromotePawnSelect.value) {
-    choosePromotionPiece(
-      player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).sort((a, b) => b.value - a.value)[0].name
-    );
+    choosePromotionPiece(player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').sort((a, b) => b.value - a.value)[0].name);
   }
   if (bot.value) {
     botPlayer.value = botPlayer.value == 1 ? 2 : 1;
@@ -229,7 +227,8 @@ function choosePromotionPiece(piece: Tile['type']) {
 }
 
 const openPromotePawnSelect = computed(() => {
-  if (player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length == 0) return null;
+  if (playerTurn.value == 1 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length == 0) return null;
+  if (playerTurn.value == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
       if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
