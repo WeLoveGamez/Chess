@@ -1,11 +1,11 @@
-import type { Position } from './types';
-import { board, applyMove, getPieceValue, selectedCell, playerTurn, King2Checked, King1Checked, piecesOnBoard, stalemateCheck } from './board';
+import type { Move, Position } from './types';
+import { board, applyMove } from './board';
 import { checkAllLegalMoves, checkLegalMoves, checkChecks } from './moves';
-import { computed, ref } from 'vue';
+import { getPieceValue } from './utils';
+import { ref } from 'vue';
 
 export const bot = ref(true);
 export const botPlayer = ref<1 | 2>(2);
-export type Move = { piece: Position; target: Position };
 
 export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: Move[]): Move {
   let returnMove: null | Move = null;
@@ -300,11 +300,11 @@ export function getGoodBotMove(moveableBotPieces: Position[], restrictedMoves?: 
 function getRandomMove(coveredFields: Position[], allMoves: Move[]) {
   let returnMove: Move;
   let rndMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
-  let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
-  returnMove = move;
-
-  if (!move?.piece[0] || !move?.target[0]) {
+  if (rndMoves.length == 0) {
     returnMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+  } else {
+    let move = rndMoves[Math.floor(Math.random() * rndMoves.length)];
+    returnMove = move;
   }
   console.log('RandomMove');
   return returnMove;
@@ -320,18 +320,3 @@ export function getMoveableBotPieces(botPlayer: number) {
   }
   return pieces;
 }
-
-export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
-export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
-export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
-export const checkMate = computed(() =>
-  King2Checked.value.length > 0 && AllLegalMoves.value.length == 0
-    ? 'checkmate for white'
-    : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
-    ? 'checkmate for black'
-    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0) ||
-      piecesOnBoard.value == 2 ||
-      stalemateCheck.value > 10
-    ? 'stalemate'
-    : ''
-);

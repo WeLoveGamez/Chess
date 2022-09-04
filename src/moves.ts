@@ -1,5 +1,4 @@
-import type { Tile } from './board';
-import type { Position } from './types';
+import type { Position, Tile } from './types';
 import { applyMove, moveHistory, King1Checked, King2Checked } from './board';
 
 export function checkChecks(player: 1 | 2, board: Tile[][]) {
@@ -14,7 +13,7 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[0].length; j++) {
       const legalMoves: Position[] = [];
-      if (board[i][j].player && board[i][j].player != player) legalMoves.push(...checkLegalMoves(i, j, board, false));
+      if (board[i][j]?.player && board[i][j]?.player != player) legalMoves.push(...checkLegalMoves(i, j, board, false));
       if (legalMoves.find(m => m[0] == kingPosition[0] && m[1] == kingPosition[1])) {
         checkingPieces.push([i, j]);
       }

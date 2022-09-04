@@ -1,7 +1,7 @@
 <template>
   <main class="container flex-column" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
-      <div class="board flex-row">
+      <div class="board">
         <div class="row" v-for="(row, rowIndex) in board">
           <div
             class="cell"
@@ -81,30 +81,32 @@
   </Modal>
 </template>
 <script setup lang="ts">
-import { computed, ref } from '@vue/reactivity';
+import { ref } from 'vue';
+import router from '../router';
+import { Modal, Button, handleClick } from 'custom-mbd-components';
+import type { Tile } from '../types';
+import { bot, getGoodBotMove, botPlayer } from '../bot';
+import { lvlUp, player, haveAllNeedUnits } from '../Player';
+import { setPlayer } from '../API';
+import { getPieceValue } from '../utils';
+import NoSleep from 'nosleep.js';
 import {
   board,
-  Tile,
   applyMove,
   moveHistory,
   King1Checked,
   King2Checked,
-  PIECES,
   selectedCell,
   playerTurn,
   createBoard,
   deadPieces,
-  getPieceValue,
   lastMovedCell,
+  openPromotePawnSelect,
+  checkMate,
+  legalMoves,
+  moveableBotPieces,
   autoPlay,
 } from '../board';
-
-import { Modal, Button, handleClick } from 'custom-mbd-components';
-import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { haveAllNeedUnits, lvlUp, player } from '../Player';
-import { setPlayer } from '../API';
-import router from '../router';
-import NoSleep from 'nosleep.js';
 
 const noSleep = new NoSleep();
 noSleep.enable();
@@ -194,7 +196,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
   }
 }
 function botMove() {
-  if (openPromotePawnSelect.value) return;
+  if (openPromotePawnSelect.value || checkMate.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
   if ((move && !(typeof move.piece[0] == 'number')) || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
@@ -225,18 +227,6 @@ function choosePromotionPiece(piece: Tile['type']) {
     botMove();
   }
 }
-
-const openPromotePawnSelect = computed(() => {
-  if (playerTurn.value == 1 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length == 0) return null;
-  if (playerTurn.value == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
-  for (let [rowIndex, row] of Object.entries(board.value)) {
-    for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
-        return [+rowIndex, +cellIndex];
-    }
-  }
-  return null;
-});
 
 const UNICODE_PIECES = {
   King: 0x2654,

@@ -108,8 +108,9 @@ import { player, boardSize, haveAllNeedUnits } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
-import { autoPlay, createBoard, getPieceValue } from '../board';
+import { autoPlay, createBoard } from '../board';
 import { computed } from '@vue/reactivity';
+import { getPieceValue } from '../utils';
 import { botPlayer } from '../bot';
 
 const selectedUnit = ref<type.UnitName>('');

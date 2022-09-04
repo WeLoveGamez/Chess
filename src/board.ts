@@ -1,30 +1,54 @@
 import { computed, Ref, ref } from 'vue';
-import { checkChecks } from './moves';
-import type { Position, DeadPiece, UnitName } from './types';
+import { checkAllLegalMoves, checkChecks, checkLegalMoves } from './moves';
+import type { Position, DeadPiece, UnitName, Tile } from './types';
 import { player, boardSize } from './Player';
-import { botPlayer } from './bot';
-export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
+import { getPieceValue } from './utils';
+import { botPlayer, getMoveableBotPieces } from './bot';
+
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
 export const lastMovedCell = computed(() => moveHistory.value.at(-1));
+export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
+export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
+export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
 export const stalemateCheck = ref(0);
 
-export interface Tile {
-  type: typeof PIECES[number] | '';
-  player: 1 | 2 | 0;
-}
-export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
+export const openPromotePawnSelect = computed(() => {
+  if (playerTurn.value == 1 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length == 0) return null;
+  if (playerTurn.value == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
+  for (let [rowIndex, row] of Object.entries(board.value)) {
+    for (let [cellIndex, cell] of Object.entries(row)) {
+      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
+        return [+rowIndex, +cellIndex];
+    }
+  }
+  return null;
+});
+export const checkMate = computed(() =>
+  King2Checked.value.length > 0 && AllLegalMoves.value.length == 0
+    ? 'checkmate for white'
+    : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
+    ? 'checkmate for black'
+    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
+      piecesOnBoard.value == 2 ||
+      stalemateCheck.value > 10
+    ? 'stalemate'
+    : ''
+);
 
+export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
 export const selectedCell = ref<Position>([-1, -1]);
 export const playerTurn = ref<1 | 2>(1);
 export const autoPlay = ref(false);
 export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e => e.type)).length);
 export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
+
 createBoard();
 export function createBoard() {
   playerTurn.value = 1;
   botPlayer.value = autoPlay.value ? 1 : 2;
+  stalemateCheck.value = 0;
   deadPieces.value = [];
   moveHistory.value = [];
   const frontline = player.value.lineup.frontline.map(e => {
@@ -60,12 +84,21 @@ export function createBoard() {
       enemyUnits[i] = '';
     }
   }
+  enemyUnits = enemyUnits.shuffle();
+  let index = enemyUnits.findIndex(e => e == 'King') + 1;
+  let front, back;
+  if (index > enemyUnits.length / 2) {
+    back = enemyUnits.splice(enemyUnits.length / 2);
+    front = enemyUnits;
+  } else {
+    front = enemyUnits.splice(enemyUnits.length / 2);
+    back = enemyUnits;
+  }
 
-  enemyUnits = shuffle(enemyUnits);
-  const enemyFrontline = enemyUnits.splice(0, frontline.length).map(e => {
+  const enemyFrontline = front.map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
-  const enemyBackline = enemyUnits.map(e => {
+  const enemyBackline = back.map(e => {
     return { type: e, player: e ? 2 : 0 } as Tile;
   });
 
@@ -77,22 +110,6 @@ export function createBoard() {
   buildBoard.push(enemyBackline);
 
   board.value = buildBoard;
-}
-export function getPieceValue(piece: Tile['type']) {
-  switch (piece) {
-    case 'Bishop':
-    case 'Knight':
-      return 3;
-    case 'Pawn':
-      return 1;
-    case 'Queen':
-      return 9;
-    case 'Rook':
-      return 5;
-    case 'King':
-      return 4;
-  }
-  return 0;
 }
 
 export function applyMove(
@@ -149,23 +166,4 @@ export function applyMove(
   }
 
   return copyBoard;
-}
-function shuffle(array: any[]) {
-  let counter = array.length;
-
-  // While there are elements in the array
-  while (counter > 0) {
-    // Pick a random index
-    let index = Math.floor(Math.random() * counter);
-
-    // Decrease counter by 1
-    counter--;
-
-    // And swap the last element with it
-    let temp = array[counter];
-    array[counter] = array[index];
-    array[index] = temp;
-  }
-
-  return array;
 }
