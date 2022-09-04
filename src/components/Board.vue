@@ -98,7 +98,7 @@ import {
 
 import { Modal, Button, handleClick } from 'custom-mbd-components';
 import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { lvlUp, player } from '../Player';
+import { haveAllNeedUnits, lvlUp, player } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import NoSleep from 'nosleep.js';
@@ -160,6 +160,7 @@ function goToMenu() {
   router.push({ name: 'Menu' });
 }
 function startGame() {
+  if (!haveAllNeedUnits) goToMenu();
   noSleep.enable();
   createBoard();
 }

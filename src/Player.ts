@@ -14,6 +14,13 @@ if (!player.value) {
     lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
   };
 }
+export const haveAllNeedUnits = computed(() => {
+  let copyPlayer: type.Player = JSON.parse(JSON.stringify(player.value));
+  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {
+    copyPlayer.units.find(e => e.name == name)!.amount--;
+  }
+  return copyPlayer.units.every(e => e.amount >= 0);
+});
 export const boardSize = computed(() => {
   const boardSize = {
     row: 3,

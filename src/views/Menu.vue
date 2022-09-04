@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
-import { player, boardSize } from '../Player';
+import { player, boardSize, haveAllNeedUnits } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
@@ -122,13 +122,7 @@ function play() {
   createBoard();
   router.push({ name: 'Board' });
 }
-const haveAllNeedUnits = computed(() => {
-  let copyPlayer: type.Player = JSON.parse(JSON.stringify(player.value));
-  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {
-    copyPlayer.units.find(e => e.name == name)!.amount--;
-  }
-  return copyPlayer.units.every(e => e.amount >= 0);
-});
+
 function availableNumber(unit: type.Unit) {
   let i = 0;
   for (let name of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
