@@ -1,5 +1,6 @@
 import { getPlayer } from './API';
 import { computed, ref } from 'vue';
+import type { Player } from './types';
 export const player = ref(getPlayer());
 if (!player.value) {
   player.value = {
@@ -14,7 +15,7 @@ if (!player.value) {
   };
 }
 export const haveAllNeedUnits = computed(() => {
-  let copyPlayer: type.Player = JSON.parse(JSON.stringify(player.value));
+  let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
   for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {
     copyPlayer.units.find(e => e.name == name)!.amount--;
   }
