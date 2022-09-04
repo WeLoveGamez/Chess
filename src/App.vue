@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <div id="container">
+    <router-view />
+  </div>
 </template>
 <script setup lang="ts">
 import Board from './components/Board.vue';
@@ -14,5 +16,8 @@ html:root {
   margin-top: 10vh;
   background-color: white !important;
   padding-bottom: 2vh;
+}
+#container {
+  padding: 8px;
 }
 </style>

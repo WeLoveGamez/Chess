@@ -2,9 +2,9 @@
   <main class="container flex-column" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
       <div class="board">
-        <div class="row" v-for="(row, rowIndex) in board">
+        <div class="row g-0" v-for="(row, rowIndex) in board">
           <div
-            class="cell"
+            class="cell col"
             v-for="(cell, cellIndex) in row"
             :class="{
               selected: selectedCell[0] === rowIndex && selectedCell[1] === cellIndex,
@@ -19,9 +19,17 @@
             @click.stop="cellClicked(rowIndex, cellIndex)"
           >
             {{ getUnicodePiece(cell.type) }}
-            <!-- <span style="font-size: 1rem">{{ rowIndex }},{{ cellIndex }}</span> -->
           </div>
         </div>
+      </div>
+    </div>
+    <div class="promotions mt-2">
+      <div
+        v-if="openPromotePawnSelect"
+        @click.stop="choosePromotionPiece(piece.name)"
+        v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
+      >
+        {{ getUnicodePiece(piece.name) }}
       </div>
     </div>
     <aside>
@@ -35,34 +43,9 @@
         <Button @click="goToMenu()">Menu</Button>
       </div>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
-      <!-- <div>selectedCell:{{ selectedCell }}</div>
-          <div>WhiteChecked:{{ King1Checked }}</div>
-          <div>BlackChecked:{{ King2Checked }}</div>
-          <div>LagalMoves:{{ legalMoves }}</div>
-          <div>AllLegalMoves:{{ AllLegalMoves }}</div> -->
       <div>checkMate:{{ checkMate }}</div>
-      <div v-if="openPromotePawnSelect" class="promotions">
-        <div
-          @click.stop="choosePromotionPiece(piece.name)"
-          v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
-        >
-          {{ getUnicodePiece(piece.name) }}
-        </div>
-      </div>
-      <div>
-        moveHistory:
-        <div v-for="move of moveHistory" :key="JSON.stringify(move)">
-          {{ ` ${move.piece} from: ${move.from} to: ${move.to}` }}
-        </div>
-      </div>
     </aside>
   </main>
-  <!-- <div class="letters">
-    <div v-for="letter in 'abcdefgh'">{{ letter }}</div>
-  </div>
-  <div class="numbers">
-    <div v-for="number in '87654321'">{{ number }}</div>
-  </div> -->
   <Modal
     :title="checkMate"
     affirm-alt-text="Menu"
@@ -244,12 +227,12 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-$size: 12vw;
-$sizePc: 12vh;
+$size: calc((100 / v-bind('board.length')) * 1vw);
+$sizePc: calc((100 / v-bind('board.length')) * 1vh);
 .board {
   transform: rotateX(180deg);
+  position: relative;
   .row {
-    display: flex;
     .cell {
       border: 1px solid #000;
       display: flex;
@@ -257,17 +240,16 @@ $sizePc: 12vh;
       align-items: center;
       width: $size;
       height: $size;
-      @media (min-width: 1000px) {
-        width: $sizePc;
-        height: $sizePc;
-      }
-
       cursor: pointer;
       background-color: gray;
       transform: rotateX(180deg);
-      font-size: 5rem;
-      @media (max-width: 1000px) {
-        font-size: 2.5rem;
+
+      font-size: 3rem;
+
+      @media (min-width: 1000px) {
+        font-size: 4rem;
+        width: $sizePc;
+        height: $sizePc;
       }
     }
   }
@@ -309,32 +291,17 @@ main {
   margin: 8px;
 }
 
-// .numbers {
-//   position: absolute;
-//   top: 10px;
-//   left: 10px;
-//   * {
-//     height: $size;
-//     font-size: 20px;
-//   }
-// }
-// .letters {
-//   position: absolute;
-//   top: calc($size * 8 - 20px);
-//   left: calc($size - 8px);
-//   display: flex;
-//   width: min-content;
-//   * {
-//     width: calc($size);
-//     font-size: 20px;
-//   }
-// }
 .promotions {
-  font-size: 2.5rem;
-  background-color: black;
+  font-size: 3rem;
   color: white;
   display: flex;
+  justify-content: center;
   * {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #854000;
+    border: 1px solid black;
     width: $size;
     height: $size;
     @media (min-width: 1000px) {
