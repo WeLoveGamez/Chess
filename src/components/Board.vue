@@ -150,7 +150,7 @@ function calcAfterGame() {
     player.value.money -= 5;
     const collection = document.getElementsByClassName('affirmButton');
     setTimeout(() => {
-      collection[0].click();
+      (collection[0] as HTMLElement).click();
     }, 2000);
   }
   setPlayer(player.value);
