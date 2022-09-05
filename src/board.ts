@@ -14,11 +14,15 @@ export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, play
 export const stalemateCheck = ref(0);
 
 export const openPromotePawnSelect = computed(() => {
-  if (playerTurn.value == 1 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length == 0) return null;
-  if (playerTurn.value == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length == 0) return null;
   for (let [rowIndex, row] of Object.entries(board.value)) {
     for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && ((+rowIndex == 0 && cell.player == 2) || (+rowIndex == board.value.length - 1 && cell.player == 1)))
+      if (
+        cell.type == 'Pawn' &&
+        ((+rowIndex == 0 && cell.player == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length > 0) ||
+          (+rowIndex == board.value.length - 1 &&
+            cell.player == 1 &&
+            player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length > 0))
+      )
         return [+rowIndex, +cellIndex];
     }
   }
@@ -107,10 +111,6 @@ export function createBoard() {
   buildBoard.push(enemyBackline);
 
   board.value = buildBoard;
-  console.log(frontline.length);
-  console.log(board.value);
-  console.log(player.value.lvl);
-  console.log(boardSize.value);
 }
 
 export function applyMove(

@@ -112,7 +112,7 @@ function save() {
   if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
 }
 function play() {
-  if (!haveAllNeedUnits) return;
+  if (!haveAllNeedUnits.value) return;
   autoPlay.value = false;
   createBoard();
   router.push({ name: 'Board' });

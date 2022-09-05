@@ -19,10 +19,11 @@ export const maxValue = computed(() => {
 });
 export const haveAllNeedUnits = computed(() => {
   let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
-  for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {
+  const lineUp = copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline);
+  for (let name of lineUp.filter(e => e)) {
     copyPlayer.units.find(e => e.name == name)!.amount--;
   }
-  return copyPlayer.units.every(e => e.amount >= 0);
+  return !copyPlayer.units.some(e => e.amount < 0 && lineUp.includes(e.name));
 });
 export const boardSize = computed(() => {
   const boardSize = {
