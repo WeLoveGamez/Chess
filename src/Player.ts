@@ -87,3 +87,10 @@ export function lvlUp() {
       player.value.units.push({ name: 'Queen', value: 9, maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
 }
+
+export function gainExp(exp: number) {
+  player.value.exp += exp;
+  while (player.value.exp >= player.value.lvl * 10) {
+    lvlUp();
+  }
+}

@@ -2,7 +2,7 @@
   <main class="container flex-column p-0 m-0" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
       <div class="board">
-        <div class="row" v-for="(row, rowIndex) in board">
+        <div class="rows" v-for="(row, rowIndex) in board">
           <div
             class="cell"
             v-for="(cell, cellIndex) in row"
@@ -42,8 +42,8 @@
           @click="
             () => {
               botPlayer = 1;
-              botMove();
               activeGame = true;
+              botMove();
             }
           "
         >
@@ -81,7 +81,7 @@ import router from '../router';
 import { Modal, Button, handleClick, Alert } from 'custom-mbd-components';
 import type { Tile } from '../types';
 import { bot, getGoodBotMove, botPlayer } from '../bot';
-import { lvlUp, player, haveAllNeedUnits } from '../Player';
+import { lvlUp, player, haveAllNeedUnits, gainExp } from '../Player';
 import { setPlayer } from '../API';
 import { getPieceValue } from '../utils';
 import NoSleep from 'nosleep.js';
@@ -130,10 +130,8 @@ function calcAfterGame() {
     }
     rewards.value.exp = Math.round(rewards.value.exp);
   }
-  player.value.exp += rewards.value.exp;
-  if (player.value.exp >= player.value.lvl * 10) {
-    lvlUp();
-  }
+  gainExp(rewards.value.exp);
+
   for (let piece of deadPieces.value.filter(e => e.player == 1)) {
     const unit = player.value.units.find(e => e.name == piece.name);
     if (unit) unit.amount--;
@@ -148,6 +146,7 @@ function calcAfterGame() {
     const collection = document.getElementsByClassName('affirmButton');
     setTimeout(() => {
       (collection[0] as HTMLElement).click();
+      activeGame.value = true;
     }, 2000);
   }
   activeGame.value = false;
@@ -161,13 +160,13 @@ function closeModal() {
   handleClick(goToMenu, startGame);
 }
 function goToMenu() {
+  activeGame.value = false;
   router.push({ name: 'Menu' });
 }
 function startGame() {
   if (!haveAllNeedUnits.value) goToMenu();
   noSleep.enable();
   createBoard();
-  activeGame.value = true;
   if (autoPlay.value) setTimeout(botMove, 500);
 }
 
@@ -191,12 +190,14 @@ function cellClicked(rowIndex: number, cellIndex: number) {
       return;
     }
     board.value = applyMove(fromRow, fromCell, toRow, toCell, legalMoves.value, board.value, playerTurn, selectedCell, moveHistory);
+    activeGame.value = true;
     if (bot && playerTurn.value == botPlayer.value && !checkMate.value) {
       setTimeout(botMove, 500);
     }
   }
 }
 function botMove() {
+  if (!activeGame.value) return;
   if (openPromotePawnSelect.value || checkMate.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
   if ((move && !(typeof move.piece[0] == 'number')) || !(typeof move.target[0] == 'number')) return;
@@ -243,13 +244,14 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-$size: calc((100vw / v-bind('board.length')));
-$sizePc: calc((100vh / v-bind('board.length')));
+$size: calc((95vw / v-bind('board.length')));
+$sizePc: calc((95vh / v-bind('board.length')));
 .board {
   transform: rotateX(180deg);
   position: relative;
-  .row {
+  .rows {
     display: flex;
+    width: 100%;
     .cell {
       border: 1px solid #000;
       display: flex;
@@ -285,10 +287,10 @@ aside {
   }
 }
 
-.row:nth-child(odd) .cell:nth-child(even) {
+.rows:nth-child(odd) .cell:nth-child(even) {
   background: #854000;
 }
-.row:nth-child(even) .cell:nth-child(odd) {
+.rows:nth-child(even) .cell:nth-child(odd) {
   background: #854000;
 }
 .selected {

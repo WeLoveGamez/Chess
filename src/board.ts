@@ -57,11 +57,12 @@ export function createBoard() {
   const backline = player.value.lineup.backline.map(e => {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });
-  for (let i = 0; i < boardSize.value.row - frontline.length; i++) {
+  for (let i = 0; i <= boardSize.value.row - frontline.length; i++) {
     frontline.push({ type: '', player: 0 });
+  }
+  for (let i = 0; i <= boardSize.value.row - backline.length; i++) {
     backline.push({ type: '', player: 0 });
   }
-
   let enemyValue = 4;
   let enemyUnits: UnitName[] = ['King'];
   const possibleUnits = player.value.units.filter(e => e.name != 'King');
