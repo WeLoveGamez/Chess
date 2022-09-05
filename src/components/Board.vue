@@ -2,9 +2,9 @@
   <main class="container flex-column p-0 m-0" @click="selectedCell = [-1, -1]">
     <div class="d-flex justify-content-center">
       <div class="board">
-        <div class="row g-0" v-for="(row, rowIndex) in board">
+        <div class="row" v-for="(row, rowIndex) in board">
           <div
-            class="cell col"
+            class="cell"
             v-for="(cell, cellIndex) in row"
             :class="{
               selected: selectedCell[0] === rowIndex && selectedCell[1] === cellIndex,
@@ -32,7 +32,7 @@
     >
       {{ getUnicodePiece(piece.name) }}
     </div>
-    <div class="aside">
+    <aside>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
       <div class="mt-1">
         <Button class="button" @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
@@ -43,7 +43,7 @@
       <div>
         <Button class="button" @click="goToMenu()">Menu</Button>
       </div>
-    </div>
+    </aside>
   </main>
   <Modal
     :title="checkMate"
@@ -232,12 +232,13 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-$size: calc((100 / v-bind('board.length')) * 1vw);
-$sizePc: calc((100 / v-bind('board.length')) * 1vh);
+$size: calc((100vw / v-bind('board.length')));
+$sizePc: calc((100vh / v-bind('board.length')));
 .board {
   transform: rotateX(180deg);
   position: relative;
   .row {
+    display: flex;
     .cell {
       border: 1px solid #000;
       display: flex;
@@ -260,7 +261,7 @@ $sizePc: calc((100 / v-bind('board.length')) * 1vh);
   }
 }
 
-.aside {
+aside {
   position: absolute;
   bottom: 0;
   left: 16px;
