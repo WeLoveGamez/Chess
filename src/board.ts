@@ -51,16 +51,17 @@ export function createBoard() {
   stalemateCheck.value = 0;
   deadPieces.value = [];
   moveHistory.value = [];
+
   const frontline = player.value.lineup.frontline.map(e => {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });
   const backline = player.value.lineup.backline.map(e => {
     return { type: e, player: e ? 1 : 0 } as Tile;
   });
-  for (let i = 0; i <= boardSize.value.row - frontline.length; i++) {
+  for (let i = 0; i < boardSize.value.row - frontline.length; i++) {
     frontline.push({ type: '', player: 0 });
   }
-  for (let i = 0; i <= boardSize.value.row - backline.length; i++) {
+  for (let i = 0; i < boardSize.value.row - backline.length; i++) {
     backline.push({ type: '', player: 0 });
   }
   let enemyValue = 4;
@@ -72,7 +73,7 @@ export function createBoard() {
       enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].name;
       enemyValue += getPieceValue(enemyUnits[i]);
     } else {
-      if (enemyValue - maxValue.value <= 2) {
+      if (maxValue.value - enemyValue >= 2) {
         enemyUnits[i] = 'Pawn';
         enemyValue += getPieceValue('Pawn');
         continue;
@@ -106,6 +107,10 @@ export function createBoard() {
   buildBoard.push(enemyBackline);
 
   board.value = buildBoard;
+  console.log(frontline.length);
+  console.log(board.value);
+  console.log(player.value.lvl);
+  console.log(boardSize.value);
 }
 
 export function applyMove(

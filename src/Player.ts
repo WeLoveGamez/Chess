@@ -68,7 +68,7 @@ export const boardSize = computed(() => {
   return boardSize;
 });
 export function lvlUp() {
-  player.value.exp -= player.value.lvl * 10;
+  player.value.exp -= needExp.value;
   player.value.lvl++;
   if (player.value.lvl >= 2) {
     if (!player.value.units.find(e => e.name == 'Bishop'))
@@ -88,11 +88,11 @@ export function lvlUp() {
   }
 }
 export const needExp = computed(() => {
-  return player.value.lvl;
+  return player.value.lvl ** 2 + 5;
 });
 export function gainExp(exp: number) {
   player.value.exp += exp;
-  while (player.value.exp >= player.value.lvl * 10) {
+  while (player.value.exp >= needExp.value) {
     lvlUp();
   }
 }

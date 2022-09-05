@@ -2,7 +2,7 @@
   <div class="container">
     <div class="text-center">{{ `lvl: ${player.lvl}` }}</div>
     <div class="mt-1">
-      <ProgressBar :progress="player.exp" :max-value="player.lvl * 10"></ProgressBar>
+      <ProgressBar :progress="player.exp" :max-value="needExp"></ProgressBar>
     </div>
     <div class="mt-3"><Button @click="play()">Play</Button></div>
     <div v-if="!haveAllNeedUnits">you do not own all the required figures</div>
@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
-import { player, boardSize, haveAllNeedUnits, maxValue } from '../Player';
+import { player, boardSize, haveAllNeedUnits, maxValue, needExp } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
@@ -132,15 +132,18 @@ function clickLineup(line: 'frontline' | 'backline', index: number) {
     removeFromLineup(line, index);
   }
 }
+function calcCost(value: number, multiplicator: number) {
+  return value * Math.round((multiplicator + 1) ** 1.5);
+}
 function displayMaxAmountCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
   const maxAmount = player.value.units.find(e => e.name == name)?.maxAmount;
-  if (typeof maxAmount == 'number') return `costs: ${(maxAmount + 1) * getPieceValue(name)}`;
+  if (typeof maxAmount == 'number') return `costs: ${calcCost(getPieceValue(name), maxAmount)}`;
 }
 function displayamountPerRoundCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
   const amountPerRound = player.value.units.find(e => e.name == name)?.amountPerRound;
-  if (typeof amountPerRound == 'number') return `costs: ${(amountPerRound + 1) * getPieceValue(name)}`;
+  if (typeof amountPerRound == 'number') return `costs: ${calcCost(getPieceValue(name), amountPerRound)}`;
 }
 function displayBuyCost(row: number, cell: number) {
   const name = getUnit(row, cell) as type.UnitName;
@@ -149,8 +152,9 @@ function displayBuyCost(row: number, cell: number) {
 function buyMaxAmount(name: type.UnitName) {
   const unit = player.value.units.find(e => e.name == name);
   if (!unit || unit?.maxAmount >= 100) return;
-  if (getPieceValue(name) * (unit?.maxAmount + 1) <= player.value.money) {
-    player.value.money -= getPieceValue(name) * (unit?.maxAmount + 1);
+  const cost = calcCost(getPieceValue(name), unit?.maxAmount);
+  if (cost <= player.value.money) {
+    player.value.money -= cost;
     unit.maxAmount++;
     setPlayer(player.value);
   }
@@ -158,8 +162,9 @@ function buyMaxAmount(name: type.UnitName) {
 function buyAmountPerRound(name: type.UnitName) {
   const unit = player.value.units.find(e => e.name == name);
   if (!unit || unit?.amountPerRound >= unit.maxAmount) return;
-  if (getPieceValue(name) * (unit?.amountPerRound + 1) <= player.value.money) {
-    player.value.money -= getPieceValue(name) * (unit?.amountPerRound + 1);
+  const cost = calcCost(getPieceValue(name), unit?.amountPerRound);
+  if (cost <= player.value.money) {
+    player.value.money -= cost;
     unit.amountPerRound++;
     setPlayer(player.value);
   }

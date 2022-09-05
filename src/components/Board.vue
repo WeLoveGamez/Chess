@@ -110,27 +110,27 @@ const activeGame = ref(false);
 
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
-  for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
+  for (let piece of deadPieces.value.filter(e => e.player == 2)) {
     rewards.value.money += getPieceValue(piece.name);
   }
-  player.value.money += rewards.value.money;
-  if (checkMate.value.includes('white'))
-    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
-      rewards.value.exp += getPieceValue(piece.type);
-    }
-  if (checkMate.value.includes('stalemate')) {
-    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
-      rewards.value.exp += getPieceValue(piece.type) / 2;
-    }
+  for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player == 1)) {
+    rewards.value.exp += getPieceValue(piece.type);
+  }
+  if (checkMate.value.includes('white')) {
+    rewards.value.money = Math.round(rewards.value.money);
     rewards.value.exp = Math.round(rewards.value.exp);
+  }
+
+  if (checkMate.value.includes('stalemate')) {
+    rewards.value.money = Math.round(rewards.value.money / 2);
+    rewards.value.exp = Math.round(rewards.value.exp / 2);
   }
   if (checkMate.value.includes('black')) {
-    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
-      rewards.value.exp += getPieceValue(piece.type) / 4;
-    }
-    rewards.value.exp = Math.round(rewards.value.exp);
+    rewards.value.money = Math.round(rewards.value.money / 4);
+    rewards.value.exp = Math.round(rewards.value.exp / 4);
   }
   gainExp(rewards.value.exp);
+  player.value.money += rewards.value.money;
 
   for (let piece of deadPieces.value.filter(e => e.player == 1)) {
     const unit = player.value.units.find(e => e.name == piece.name);
