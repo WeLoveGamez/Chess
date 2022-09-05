@@ -1,8 +1,8 @@
 <template>
-  <main class="container flex-column" @click="selectedCell = [-1, -1]">
-    <div>
-      <div class="board flex-row">
-        <div class="row" v-for="(row, rowIndex) in board">
+  <main class="container flex-column p-0 m-0" @click="selectedCell = [-1, -1]">
+    <div class="d-flex justify-content-center">
+      <div class="board">
+        <div class="rows" v-for="(row, rowIndex) in board">
           <div
             class="cell"
             v-for="(cell, cellIndex) in row"
@@ -19,50 +19,51 @@
             @click.stop="cellClicked(rowIndex, cellIndex)"
           >
             {{ getUnicodePiece(cell.type) }}
-            <!-- <span style="font-size: 1rem">{{ rowIndex }},{{ cellIndex }}</span> -->
           </div>
         </div>
       </div>
     </div>
+
+    <div
+      class="promotions mt-2"
+      v-if="openPromotePawnSelect"
+      @click.stop="choosePromotionPiece(piece.name)"
+      v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
+    >
+      {{ getUnicodePiece(piece.name) }}
+    </div>
     <aside>
-      <div>
-        <span class="text-center">Play vs Bot:</span>
-        <Button @click="bot = !bot">{{ bot }}</Button>
-      </div>
-      <div>
-        <Button @click="goToMenu()">Menu</Button>
-      </div>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
-      <!-- <div>selectedCell:{{ selectedCell }}</div>
-          <div>WhiteChecked:{{ King1Checked }}</div>
-          <div>BlackChecked:{{ King2Checked }}</div>
-          <div>LagalMoves:{{ legalMoves }}</div>
-          <div>AllLegalMoves:{{ AllLegalMoves }}</div> -->
-      <div>checkMate:{{ checkMate }}</div>
-      <div v-if="openPromotePawnSelect" class="promotions">
-        <div @click.stop="choosePromotionPiece(piece)" v-for="piece of PIECES.filter(p => p != 'King' && p != 'Pawn')">
-          {{ getUnicodePiece(piece) }}
-        </div>
+      <div class="mt-1">
+        <Button class="button" @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
+      </div>
+      <div v-if="bot && !activeGame">
+        <Button
+          @click="
+            () => {
+              botPlayer = 1;
+              activeGame = true;
+              botMove();
+            }
+          "
+        >
+          start
+        </Button>
       </div>
       <div>
-        moveHistory:
-        <div v-for="move of moveHistory" :key="JSON.stringify(move)">
-          {{ ` ${move.piece} from: ${move.from} to: ${move.to}` }}
-        </div>
+        <Button class="button" @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
+      </div>
+      <div>
+        <Button class="button" @click="goToMenu()">Menu</Button>
       </div>
     </aside>
   </main>
-  <!-- <div class="letters">
-    <div v-for="letter in 'abcdefgh'">{{ letter }}</div>
-  </div>
-  <div class="numbers">
-    <div v-for="number in '87654321'">{{ number }}</div>
-  </div> -->
   <Modal
     :title="checkMate"
     affirm-alt-text="Menu"
     affirm-text="Play Again"
     :affirm-action="closeModal"
+    affirm-class="affirmButton"
     :affirm-alt-action="goToMenu"
     :model-value="!!checkMate"
     @update:model-value="show => (show ? calcAfterGame() : closeModal())"
@@ -75,28 +76,38 @@
   </Modal>
 </template>
 <script setup lang="ts">
-import { computed, ref } from '@vue/reactivity';
+import { computed, ref, watchEffect } from 'vue';
+import router from '../router';
+import { Modal, Button, handleClick, Alert } from 'custom-mbd-components';
+import type { Tile } from '../types';
+import { bot, getGoodBotMove, botPlayer } from '../bot';
+import { lvlUp, player, haveAllNeedUnits, gainExp } from '../Player';
+import { setPlayer } from '../API';
+import { getPieceValue } from '../utils';
+import NoSleep from 'nosleep.js';
 import {
   board,
-  Tile,
   applyMove,
   moveHistory,
   King1Checked,
   King2Checked,
-  PIECES,
   selectedCell,
   playerTurn,
   createBoard,
   deadPieces,
-  getPieceValue,
   lastMovedCell,
+  openPromotePawnSelect,
+  checkMate,
+  legalMoves,
+  moveableBotPieces,
+  autoPlay,
 } from '../board';
 
-import { Button, handleClick, Modal } from 'custom-mbd-components';
-import { bot, getGoodBotMove, botPlayer, legalMoves, checkMate, moveableBotPieces } from '../bot';
-import { lvlUp, player } from '../Player';
-import { setPlayer } from '../API';
-import router from '../router';
+const noSleep = new NoSleep();
+noSleep.enable();
+
+const activeGame = ref(false);
+
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == botPlayer.value)) {
@@ -107,10 +118,38 @@ function calcAfterGame() {
     for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
       rewards.value.exp += getPieceValue(piece.type);
     }
-  player.value.exp += rewards.value.exp;
-  if (player.value.exp >= player.value.lvl * 10) {
-    lvlUp();
+  if (checkMate.value.includes('stalemate')) {
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      rewards.value.exp += getPieceValue(piece.type) / 2;
+    }
+    rewards.value.exp = Math.round(rewards.value.exp);
   }
+  if (checkMate.value.includes('black')) {
+    for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player != botPlayer.value)) {
+      rewards.value.exp += getPieceValue(piece.type) / 4;
+    }
+    rewards.value.exp = Math.round(rewards.value.exp);
+  }
+  gainExp(rewards.value.exp);
+
+  for (let piece of deadPieces.value.filter(e => e.player == 1)) {
+    const unit = player.value.units.find(e => e.name == piece.name);
+    if (unit) unit.amount--;
+  }
+  for (let piece of player.value.units) {
+    piece.amount += piece.amountPerRound;
+    if (piece.amount > piece.maxAmount) piece.amount = piece.maxAmount;
+  }
+  noSleep.disable();
+  if (autoPlay.value && player.value.money >= 5) {
+    player.value.money -= 5;
+    const collection = document.getElementsByClassName('affirmButton');
+    setTimeout(() => {
+      (collection[0] as HTMLElement).click();
+      activeGame.value = true;
+    }, 2000);
+  }
+  activeGame.value = false;
   setPlayer(player.value);
 }
 function resetRewards() {
@@ -121,10 +160,14 @@ function closeModal() {
   handleClick(goToMenu, startGame);
 }
 function goToMenu() {
+  activeGame.value = false;
   router.push({ name: 'Menu' });
 }
 function startGame() {
+  if (!haveAllNeedUnits.value) goToMenu();
+  noSleep.enable();
   createBoard();
+  if (autoPlay.value) setTimeout(botMove, 500);
 }
 
 function cellClicked(rowIndex: number, cellIndex: number) {
@@ -147,15 +190,17 @@ function cellClicked(rowIndex: number, cellIndex: number) {
       return;
     }
     board.value = applyMove(fromRow, fromCell, toRow, toCell, legalMoves.value, board.value, playerTurn, selectedCell, moveHistory);
+    activeGame.value = true;
     if (bot && playerTurn.value == botPlayer.value && !checkMate.value) {
       setTimeout(botMove, 500);
     }
   }
 }
 function botMove() {
-  if (openPromotePawnSelect.value) return;
+  if (!activeGame.value) return;
+  if (openPromotePawnSelect.value || checkMate.value) return;
   let move = getGoodBotMove(moveableBotPieces.value);
-  if (!move.piece[0] || !move.target[0]) return;
+  if ((move && !(typeof move.piece[0] == 'number')) || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
   board.value = applyMove(
     move.piece[0],
@@ -169,7 +214,11 @@ function botMove() {
     moveHistory
   );
   if (openPromotePawnSelect.value) {
-    choosePromotionPiece('Queen');
+    choosePromotionPiece(player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').sort((a, b) => b.value - a.value)[0].name);
+  }
+  if (bot.value) {
+    botPlayer.value = botPlayer.value == 1 ? 2 : 1;
+    setTimeout(botMove, 500);
   }
 }
 
@@ -180,15 +229,6 @@ function choosePromotionPiece(piece: Tile['type']) {
     botMove();
   }
 }
-
-const openPromotePawnSelect = computed(() => {
-  for (let [rowIndex, row] of Object.entries(board.value)) {
-    for (let [cellIndex, cell] of Object.entries(row)) {
-      if (cell.type == 'Pawn' && (+rowIndex == 0 || +rowIndex == 7)) return [+rowIndex, +cellIndex];
-    }
-  }
-  return null;
-});
 
 const UNICODE_PIECES = {
   King: 0x2654,
@@ -204,14 +244,14 @@ function getUnicodePiece(string: Tile['type']) {
 }
 </script>
 <style lang="scss" scoped>
-$size: 12vw;
-
+$size: calc((95vw / v-bind('board.length')));
+$sizePc: calc((95vh / v-bind('board.length')));
 .board {
   transform: rotateX(180deg);
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(8, auto);
+  position: relative;
+  .rows {
+    display: flex;
+    width: 100%;
     .cell {
       border: 1px solid #000;
       display: flex;
@@ -222,36 +262,50 @@ $size: 12vw;
       cursor: pointer;
       background-color: gray;
       transform: rotateX(180deg);
-      font-size: 5rem;
-      @media (max-width: 1000px) {
-        font-size: 2.5rem;
+
+      font-size: 3rem;
+
+      @media (min-width: 1000px) {
+        font-size: 4rem;
+        width: $sizePc;
+        height: $sizePc;
       }
     }
   }
 }
 
-aside * {
-  margin: 20px;
+aside {
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  width: calc(100% - 32px);
+  * {
+    margin-bottom: 0.25rem;
+  }
+  .button {
+    width: 100%;
+  }
 }
 
-.row:nth-child(odd) .cell:nth-child(even) {
+.rows:nth-child(odd) .cell:nth-child(even) {
   background: #854000;
 }
-.row:nth-child(even) .cell:nth-child(odd) {
+.rows:nth-child(even) .cell:nth-child(odd) {
   background: #854000;
 }
 .selected {
   box-shadow: inset 0 0 0 2000px rgba(35, 211, 0, 0.5);
   color: white;
 }
+
+.lastMoved {
+  background-color: rgb(146, 155, 108) !important;
+}
 .checking {
   background-color: red !important;
 }
 .legal {
   background-color: aqua !important;
-}
-.lastMoved {
-  background-color: rgb(146, 155, 108) !important;
 }
 .whitePiece {
   color: white;
@@ -265,34 +319,23 @@ main {
   margin: 8px;
 }
 
-// .numbers {
-//   position: absolute;
-//   top: 10px;
-//   left: 10px;
-//   * {
-//     height: $size;
-//     font-size: 20px;
-//   }
-// }
-// .letters {
-//   position: absolute;
-//   top: calc($size * 8 - 20px);
-//   left: calc($size - 8px);
-//   display: flex;
-//   width: min-content;
-//   * {
-//     width: calc($size);
-//     font-size: 20px;
-//   }
-// }
 .promotions {
-  font-size: 2.5rem;
-  background-color: black;
+  font-size: 3rem;
   color: white;
   display: flex;
+  justify-content: center;
   * {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #854000;
+    border: 1px solid black;
     width: $size;
     height: $size;
+    @media (min-width: 1000px) {
+      width: $sizePc;
+      height: $sizePc;
+    }
     cursor: pointer;
   }
 }

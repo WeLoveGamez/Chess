@@ -1,5 +1,4 @@
-import type { Tile } from './board';
-import type { Position } from './types';
+import type { Position, Tile } from './types';
 import { applyMove, moveHistory, King1Checked, King2Checked } from './board';
 
 export function checkChecks(player: 1 | 2, board: Tile[][]) {
@@ -14,7 +13,7 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[0].length; j++) {
       const legalMoves: Position[] = [];
-      if (board[i][j].player && board[i][j].player != player) legalMoves.push(...checkLegalMoves(i, j, board, false));
+      if (board[i][j]?.player && board[i][j]?.player != player) legalMoves.push(...checkLegalMoves(i, j, board, false));
       if (legalMoves.find(m => m[0] == kingPosition[0] && m[1] == kingPosition[1])) {
         checkingPieces.push([i, j]);
       }
@@ -25,29 +24,20 @@ export function checkChecks(player: 1 | 2, board: Tile[][]) {
 
 export function checkLegalMoves(fromRow: number, fromCell: number, board: Tile[][], checkIllegalMoves: boolean): Position[] {
   if (fromRow == -1 || fromCell == -1) return [];
-  let legalMoves: Position[] = [];
+
   const tile = board[fromRow][fromCell];
   const piece = tile.type;
   const player = tile.player;
-  if (piece.includes('Rook')) {
-    legalMoves.push(...checkLegalMovesRook(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Knight')) {
-    legalMoves.push(...checkLegalMovesKnight(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Bishop')) {
-    legalMoves.push(...checkLegalMovesBishop(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Queen')) {
-    legalMoves.push(...checkLegalMovesBishop(fromRow, fromCell, player, board));
-    legalMoves.push(...checkLegalMovesRook(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('King')) {
-    legalMoves.push(...checkLegalMovesKing(fromRow, fromCell, player, board));
-  }
-  if (piece.includes('Pawn')) {
-    legalMoves.push(...checkLegalMovesPawn(fromRow, fromCell, player, board));
-  }
+  let legalMoves = {
+    Rook: checkLegalMovesRook,
+    Knight: checkLegalMovesKnight,
+    Bishop: checkLegalMovesBishop,
+    Queen: (...args: [number, number, 1 | 2 | 0, Tile[][]]) => [...checkLegalMovesBishop(...args), ...checkLegalMovesRook(...args)],
+    King: checkLegalMovesKing,
+    Pawn: checkLegalMovesPawn,
+    '': () => [],
+  }[piece](fromRow, fromCell, player, board);
+
   if (player && checkIllegalMoves) legalMoves = removeIllegalmoves(legalMoves, board, player, fromRow, fromCell);
   return legalMoves;
 }
@@ -66,7 +56,6 @@ function checkLegalMovesPawn(fromRow: number, fromCell: number, player: 1 | 2 | 
   const playerOffset = player == 1 ? 1 : -1;
   //straight
   if (board[fromRow + playerOffset]?.[fromCell]?.type == '') legalMoves.push([fromRow + playerOffset, fromCell]);
-
   //straight 2
   if (
     fromRow == (playerOffset == 1 ? 1 : 6) &&
@@ -273,7 +262,7 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
 function removeIllegalmoves(legalMoves: Position[], board: Tile[][], player: 1 | 2, fromRow: number, fromCell: number): Position[] {
   const checks: Position[] = [];
   if (!board[fromRow][fromCell].type) return [];
-  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= 7 && m[1] <= 7 && 0 <= m[1]);
+  legalMoves = legalMoves.filter(m => 0 <= m[0] && m[0] <= board.length - 1 && m[1] <= board[0].length - 1 && 0 <= m[1]);
   for (let action of legalMoves) {
     if (checkChecks(player, applyMove(fromRow, fromCell, action[0], action[1], legalMoves, board)).length > 0) {
       checks.push(action);

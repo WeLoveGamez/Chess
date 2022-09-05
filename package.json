@@ -11,6 +11,7 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.0",
     "custom-mbd-components": "github:MBD-Team/customMBDComponents",
+    "nosleep.js": "^0.12.0",
     "register-service-worker": "^1.7.1",
     "sass": "^1.54.5",
     "vue": "^3.2.37",
