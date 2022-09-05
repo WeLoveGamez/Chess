@@ -37,6 +37,19 @@
       <div class="mt-1">
         <Button class="button" @click="bot = !bot">{{ bot ? 'bot' : 'player' }}</Button>
       </div>
+      <div v-if="bot && !activeGame">
+        <Button
+          @click="
+            () => {
+              botPlayer = 1;
+              botMove();
+              activeGame = true;
+            }
+          "
+        >
+          start
+        </Button>
+      </div>
       <div>
         <Button class="button" @click="autoPlay = !autoPlay">{{ autoPlay ? 'auto play' : 'no auto play' }}</Button>
       </div>
@@ -93,11 +106,7 @@ import {
 const noSleep = new NoSleep();
 noSleep.enable();
 
-watchEffect(() => {
-  if (checkMate.value) {
-    calcAfterGame();
-  }
-});
+const activeGame = ref(false);
 
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
@@ -141,6 +150,7 @@ function calcAfterGame() {
       (collection[0] as HTMLElement).click();
     }, 2000);
   }
+  activeGame.value = false;
   setPlayer(player.value);
 }
 function resetRewards() {
@@ -157,6 +167,7 @@ function startGame() {
   if (!haveAllNeedUnits.value) goToMenu();
   noSleep.enable();
   createBoard();
+  activeGame.value = true;
   if (autoPlay.value) setTimeout(botMove, 500);
 }
 

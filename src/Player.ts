@@ -14,6 +14,9 @@ if (!player.value) {
     lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
   };
 }
+export const maxValue = computed(() => {
+  return player.value.lvl * 3 + 6;
+});
 export const haveAllNeedUnits = computed(() => {
   let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
   for (let name of copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline).filter(e => e)) {

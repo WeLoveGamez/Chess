@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Button, ProgressBar, Modal } from 'custom-mbd-components';
-import { player, boardSize, haveAllNeedUnits } from '../Player';
+import { player, boardSize, haveAllNeedUnits, maxValue } from '../Player';
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
@@ -189,9 +189,7 @@ const usedValue = computed(() => {
   }
   return used;
 });
-const maxValue = computed(() => {
-  return player.value.lvl * 3 + 6;
-});
+
 function getUnit(row: number, cell: number): type.UnitName | string {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';
