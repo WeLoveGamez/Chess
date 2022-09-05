@@ -61,19 +61,6 @@
       <div></div>
     </template>
   </Modal>
-  <!-- <Alert class="my-2 px-3" :timer="2000" alertClass="alert-success" :show="showAlert">
-    <div class="card border-0">
-      <div class="card-title py-1">{{ checkMate }}</div>
-      <div class="card-body py-1 d-flex justify-content-around">
-        <div>{{ `Money: ${rewards.money}` }}</div>
-        <div>{{ `Exp: ${rewards.exp}` }}</div>
-      </div>
-      <div class="d-flex justify-content-end">
-        <div class="m-1 w-50"><Button class="affirmButton" @click="closeModal()">Play Again</Button></div>
-        <div class="m-1 w-50"><Button class="affirmButton" @click="goToMenu()">Menu</Button></div>
-      </div>
-    </div>
-  </Alert> -->
 </template>
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
@@ -103,16 +90,12 @@ import {
   autoPlay,
 } from '../board';
 
-// const showValue = ref(false);
-// const showAlert = ref({ show: showValue.value });
-
 const noSleep = new NoSleep();
 noSleep.enable();
 
 watchEffect(() => {
   if (checkMate.value) {
     calcAfterGame();
-    // showValue.value = true;
   }
 });
 
@@ -171,7 +154,7 @@ function goToMenu() {
   router.push({ name: 'Menu' });
 }
 function startGame() {
-  if (!haveAllNeedUnits) goToMenu();
+  if (!haveAllNeedUnits.value) goToMenu();
   noSleep.enable();
   createBoard();
   if (autoPlay.value) setTimeout(botMove, 500);
