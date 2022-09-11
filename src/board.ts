@@ -48,6 +48,16 @@ export const piecesOnBoard = computed(() => board.value.flatMap(p => p.filter(e 
 export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
 
+export function getTile(position: Position) {
+  return board.value[position[0]][position[1]];
+}
+export function getPieceType(position: Position): UnitName {
+  return getTile(position).type;
+}
+export function getTilePlayer(position: Position): 0 | 1 | 2 {
+  return getTile(position).player;
+}
+
 createBoard();
 export function createBoard() {
   playerTurn.value = 1;

@@ -20,17 +20,17 @@ Object.defineProperty(Array.prototype, 'shuffle', {
 
 export function getPieceValue(piece: Tile['type']) {
   switch (piece) {
+    default:
+    case 'Pawn':
+      return 1;
     case 'Bishop':
     case 'Knight':
       return 3;
-    case 'Pawn':
-      return 1;
-    case 'Queen':
-      return 9;
-    case 'Rook':
-      return 5;
     case 'King':
       return 4;
+    case 'Rook':
+      return 5;
+    case 'Queen':
+      return 9;
   }
-  return 0;
 }
