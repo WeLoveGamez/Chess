@@ -7,19 +7,7 @@ import { ref } from 'vue';
 export const bot = ref(true);
 export const botPlayer = ref<1 | 2>(2);
 
-// export function getMoveableBotPieces(botPlayer: number) {
-//   let pieces: Position[] = [];
-//   for (let [rowIndex, row] of Object.entries(board.value)) {
-//     for (let [cellIndex, cell] of Object.entries(row)) {
-//       if (board.value[+rowIndex][+cellIndex].player == botPlayer && checkLegalMoves(+rowIndex, +cellIndex, board.value, true).length != 0) {
-//         pieces.push([+rowIndex, +cellIndex]);
-//       }
-//     }
-//   }
-//   return pieces;
-// }
-
-export function getGoodBotMove(moveableBotPieces: Position[]): Move {
+export function getGoodBotMove(): Move {
   const allMoves = getAllMoves();
   const checkMates = getCheckmates(allMoves);
   if (checkMates.length > 0) {
@@ -29,59 +17,50 @@ export function getGoodBotMove(moveableBotPieces: Position[]): Move {
 
   const targetablePieces = getTargetablePieces(allMoves);
   const blunders = getSortedBlunders(targetablePieces);
-  if (blunders.length > 0) {
+  const trades = getSortedTrades(targetablePieces);
+  const queenTakes = getSortedQueenTakes(allMoves);
+  let dif;
+  if (trades.length > 0) {
+    dif = getPieceValue(getPieceType(trades[0].target)) - getPieceValue(getPieceType(trades[0].piece));
+  }
+  if (dif && trades.length > 0 && blunders.length > 0) {
+    if (queenTakes.length > 0 && getPieceValue(getPieceType(queenTakes[0].target)) - getPieceValue(getPieceType(queenTakes[0].piece)) >= dif) {
+      return queenTakes[0];
+    }
+    if (getPieceValue(getPieceType(blunders[0].target)) >= dif) {
+      return blunders[0];
+    }
+  } else if (blunders.length > 0) {
     return blunders[0];
   }
-  // const noKingMoves = allMoves.filter(m => board.value[m.piece[0]][m.piece[1]].type == 'King');
+
   const coveredFields = getCoveredFields(allMoves, botPlayer.value);
-  const queenTakes = getSortedQueenTakes(allMoves);
-  const checks = getChecks(allMoves, coveredFields);
-  const trades = getSortedTrades(targetablePieces);
-  const preventBlunders = getPreventBlunders(allMoves);
-
-  //  TODO: fix all prio checks below
-  {
-    {
-      let bestTrade = trades[0];
-      if (bestTrade) {
-        let bestDifference = getPieceValue(getPieceType(bestTrade.target)) - getPieceValue(getPieceType(bestTrade.piece));
-
-        returnMove = bestTrade;
-        console.log('trade', '+', bestDifference);
+  const preventBlunders = getSortedPreventBlunders(allMoves);
+  const checks = getSafeChecks(allMoves, coveredFields);
+  if (preventBlunders.length > 0) {
+    if (checks.length > 0) {
+      for (let move of preventBlunders) {
+        let safeWithCheck = checks.find(m => m.piece[0] == move.piece[0] && m.piece[1] == move.piece[1]);
+        if (safeWithCheck) return safeWithCheck;
       }
     }
-    if (safeBlunderedPiece) {
-      returnMove = safeBlunderedPiece;
-      console.log('preventBlunder');
+    if (dif && dif > getPieceValue(getPieceType(preventBlunders[0].piece))) {
+      return trades[0];
     }
+    return preventBlunders[0];
   }
-  //check if "blundered" piece can trade
-  if (tradeMove && safeBlunderedPiece && safeBlunderedPiece.piece[0] == tradeMove.piece[0] && safeBlunderedPiece.piece[0] == tradeMove.piece[1]) {
-    returnMove = tradeMove;
+  if (trades[0]) {
+    return trades[0];
   }
-  if (queenTake || takeBlunder) {
-    if (queenTake) {
-      returnMove = queenTake;
-      console.log('takeQueen');
-      if (getPieceType(queenTake.piece) == 'Queen' && takeBlunder) {
-        returnMove = takeBlunder;
-      }
-    } else {
-      returnMove = takeBlunder;
-    }
+  if (checks.length > 0) {
+    return checks[0];
   }
-  if (check) {
-    returnMove = check;
-    console.log('check');
-  }
-
-  if (restrictedMove) return restrictedMove;
-  //get random move without blunders if nothing else works
-  if (!returnMove) {
-    console.log('no returnMove found');
-    returnMove = getRandomSafeMove(coveredFields, allMoves);
-  }
-  return returnMove;
+  const noKingMoves = allMoves.filter(m => getPieceType(m.piece) == 'King');
+  let safeNoKingMove = getRandomSafeMove(coveredFields, noKingMoves);
+  let safeMove = getRandomSafeMove(coveredFields, allMoves);
+  if (safeNoKingMove) return safeNoKingMove;
+  else if (safeMove) return safeMove;
+  else return allMoves.sort((a, b) => getPieceValue(getPieceType(a.piece)) - getPieceValue(getPieceType(b.piece)))[0];
 }
 
 function getAllMoves() {
@@ -176,7 +155,7 @@ function getCheckmates(allMoves: Move[]) {
   return checkmates;
 }
 
-function getChecks(allMoves: Move[], coveredFields: Position[]) {
+function getSafeChecks(allMoves: Move[], coveredFields: Position[]) {
   let viableMoves = allMoves.filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
   let checks: Move[] = [];
   for (let move of viableMoves) {
@@ -216,7 +195,7 @@ function getSortedTrades(targetablePieces: Move[]) {
   return tradeMoves;
 }
 
-function getPreventBlunders(allMoves: Move[]) {
+function getSortedPreventBlunders(allMoves: Move[]) {
   let allEnemyMoves: Move[] = allMoves.filter(m => getTilePlayer(m.piece) != botPlayer.value);
   let attackedPieces: Move[] = allEnemyMoves.filter(m => getTilePlayer(m.target) == botPlayer.value);
   // let byEnemyCoveredFields: Position[] = allEnemyMoves.map(m => m.target);
@@ -243,27 +222,6 @@ function getPreventBlunders(allMoves: Move[]) {
     }
   }
   blunderedPieces.sort((a, b) => getPieceValue(getPieceType(b.target)) - getPieceValue(getPieceType(a.target)));
-  // safeStrongestPiece: {
-  //   let strongest = blunderedPieces[0].target;
-
-  //   let safeMoves = allMoves
-  //     .filter(m => blunderedPieces.find(p => p.target[0] == m.piece[0] && p.target[1] == m.piece[1]))
-  //     .filter(m => !coveredFields.find(f => f[0] == m.target[0] && f[1] == m.target[1]));
-
-  //   if (safeMoves.find(m => m.piece[0] == strongest[0] && m.piece[1] == strongest[1])) {
-  //     safeMoves = safeMoves.filter(m => m.piece[0] == strongest[0] && m.piece[1] == strongest[1]);
-  //   }
-  //   if (safeMoves.length > 0) {
-  //     safeBlunderedPiece = safeMoves[Math.floor(Math.random() * safeMoves.length)];
-  //   }
-  //   for (let piece of blunderedPieces.map(m => m.target)) {
-  //     let possibleMoves = safeMoves.filter(m => m.piece[0] == piece[0] && m.piece[1] == piece[1]);
-  //     if (possibleMoves.length > 0) {
-  //       safeBlunderedPiece = possibleMoves[0];
-  //       break;
-  //     }
-  //   }
-  // }
   return blunderedPieces;
 }
 

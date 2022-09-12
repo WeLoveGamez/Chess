@@ -99,7 +99,6 @@ import {
   openPromotePawnSelect,
   checkMate,
   legalMoves,
-  moveableBotPieces,
   autoPlay,
 } from '../board';
 
@@ -199,7 +198,7 @@ function cellClicked(rowIndex: number, cellIndex: number) {
 function botMove() {
   if (!activeGame.value) return;
   if (openPromotePawnSelect.value || checkMate.value) return;
-  let move = getGoodBotMove(moveableBotPieces.value);
+  let move = getGoodBotMove();
   if ((move && !(typeof move.piece[0] == 'number')) || !(typeof move.target[0] == 'number')) return;
   selectedCell.value = move.piece;
   board.value = applyMove(

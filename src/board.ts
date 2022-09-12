@@ -7,7 +7,7 @@ import { botPlayer } from './bot';
 
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
-// export const lastMovedCell = computed(() => moveHistory.value.at(-1));
+export const lastMovedCell = computed(() => moveHistory.value.at(-1));
 // export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
 export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
 export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
@@ -49,6 +49,7 @@ export const deadPieces = ref<DeadPiece[]>([]);
 export const board = ref<Tile[][]>([]);
 
 export function getTile(position: Position) {
+  console.trace(position);
   return board.value[position[0]][position[1]];
 }
 export function getPieceType(position: Position): UnitName {
