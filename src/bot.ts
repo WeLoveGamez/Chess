@@ -7,37 +7,37 @@ import { ref } from 'vue';
 export const bot = ref(true);
 export const botPlayer = ref<1 | 2>(2);
 
-export function getMoveableBotPieces(botPlayer: number) {
-  let pieces: Position[] = [];
-  for (let [rowIndex, row] of Object.entries(board.value)) {
-    for (let [cellIndex, cell] of Object.entries(row)) {
-      if (board.value[+rowIndex][+cellIndex].player == botPlayer && checkLegalMoves(+rowIndex, +cellIndex, board.value, true).length != 0) {
-        pieces.push([+rowIndex, +cellIndex]);
-      }
-    }
-  }
-  return pieces;
-}
+// export function getMoveableBotPieces(botPlayer: number) {
+//   let pieces: Position[] = [];
+//   for (let [rowIndex, row] of Object.entries(board.value)) {
+//     for (let [cellIndex, cell] of Object.entries(row)) {
+//       if (board.value[+rowIndex][+cellIndex].player == botPlayer && checkLegalMoves(+rowIndex, +cellIndex, board.value, true).length != 0) {
+//         pieces.push([+rowIndex, +cellIndex]);
+//       }
+//     }
+//   }
+//   return pieces;
+// }
 
 export function getGoodBotMove(moveableBotPieces: Position[]): Move {
-  let returnMove: null | Move = null;
-
-  const allMoves = getAllMoves(moveableBotPieces);
-  const targetablePieces = getTargetablePieces(allMoves);
-  const coveredFields = getCoveredFields(allMoves, botPlayer.value);
-
-  // const noKingMoves = allMoves.filter(m => board.value[m.piece[0]][m.piece[1]].type == 'King');
-  const blunders = getSortedBlunders(targetablePieces);
-  const queenTakes = getSortedQueenTakes(allMoves);
+  const allMoves = getAllMoves();
   const checkMates = getCheckmates(allMoves);
-  const checks = getChecks(allMoves, coveredFields);
-  const trades = getSortedTrades(targetablePieces);
-  const preventBlunders = getPreventBlunders(allMoves);
-
   if (checkMates.length > 0) {
     console.log('checkmate');
     return checkMates[0];
   }
+
+  const targetablePieces = getTargetablePieces(allMoves);
+  const blunders = getSortedBlunders(targetablePieces);
+  if (blunders.length > 0) {
+    return blunders[0];
+  }
+  // const noKingMoves = allMoves.filter(m => board.value[m.piece[0]][m.piece[1]].type == 'King');
+  const coveredFields = getCoveredFields(allMoves, botPlayer.value);
+  const queenTakes = getSortedQueenTakes(allMoves);
+  const checks = getChecks(allMoves, coveredFields);
+  const trades = getSortedTrades(targetablePieces);
+  const preventBlunders = getPreventBlunders(allMoves);
 
   //  TODO: fix all prio checks below
   {
@@ -84,16 +84,19 @@ export function getGoodBotMove(moveableBotPieces: Position[]): Move {
   return returnMove;
 }
 
-function getAllMoves(moveableBotPieces: Position[]) {
+function getAllMoves() {
   let allMoves: Move[] = [];
 
-  for (let position of moveableBotPieces) {
-    let targets = checkLegalMoves(position[0], position[1], board.value, true);
-    for (let target of targets) {
-      allMoves.push({ piece: position, target: target });
+  for (let [rowIndex, row] of Object.entries(board.value)) {
+    for (let [cellIndex, cell] of Object.entries(row)) {
+      let moves = checkLegalMoves(+rowIndex, +cellIndex, board.value, true);
+      if (getTilePlayer([+rowIndex, +cellIndex]) == botPlayer.value) {
+        for (let move of moves) {
+          allMoves.push({ piece: [+rowIndex, +cellIndex], target: move });
+        }
+      }
     }
   }
-
   return allMoves;
 }
 

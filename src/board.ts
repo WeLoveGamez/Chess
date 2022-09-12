@@ -3,12 +3,12 @@ import { checkAllLegalMoves, checkChecks, checkLegalMoves } from './moves';
 import type { Position, DeadPiece, UnitName, Tile } from './types';
 import { player, boardSize, maxValue } from './Player';
 import { getPieceValue } from './utils';
-import { botPlayer, getMoveableBotPieces } from './bot';
+import { botPlayer } from './bot';
 
 export const King1Checked = computed(() => checkChecks(1, board.value));
 export const King2Checked = computed(() => checkChecks(2, board.value));
-export const lastMovedCell = computed(() => moveHistory.value.at(-1));
-export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
+// export const lastMovedCell = computed(() => moveHistory.value.at(-1));
+// export const moveableBotPieces = computed(() => getMoveableBotPieces(botPlayer.value));
 export const legalMoves = computed(() => checkLegalMoves(selectedCell.value[0], selectedCell.value[1], board.value, true));
 export const AllLegalMoves = computed(() => checkAllLegalMoves(board.value, playerTurn.value));
 export const stalemateCheck = ref(0);
