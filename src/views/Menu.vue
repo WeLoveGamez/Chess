@@ -10,23 +10,23 @@
       <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
         <div class="container">
           <div>
-            {{ `${usedValue} /${maxValue}` }}
+            {{ `used Value: ${usedValue} /${maxValue}` }}
           </div>
           <div class="d-flex">
-            <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
+            <div v-for="unit of player.units.filter(e => availableNumber(e) > 0)" class="me-2 icons" @click="selectedUnit = unit.name">
               {{ `${getUnicodePiece(unit.name)}: ${availableNumber(unit)}` }}
             </div>
           </div>
-          <div>
-            {{ getUnicodePiece(selectedUnit) || 'no selected unit' }}
+          <div :class="{ icons: getUnicodePiece(selectedUnit) }">
+            {{ `selected: ${getUnicodePiece(selectedUnit) || 'none'}` }}
           </div>
           <div class="lineup">
-            <div class="front">
+            <div class="front d-flex">
               <button v-for="index of boardSize.row" class="frontline" @click="clickLineup('frontline', index - 1)">
                 {{ getUnicodePiece(player.lineup.frontline[index - 1]) }}
               </button>
             </div>
-            <div class="back">
+            <div class="back d-flex">
               <button v-for="index of boardSize.row" class="backline" @click="clickLineup('backline', index - 1)">
                 {{ getUnicodePiece(player.lineup.backline[index - 1]) }}
               </button>
@@ -240,6 +240,12 @@ function getUnit(row: number, cell: number): type.UnitName | string {
 
   @media (max-width: 1000px) {
     font-size: 2.5rem;
+  }
+}
+.icons {
+  font-size: 3rem;
+  @media (max-width: 1000px) {
+    font-size: 1.5rem;
   }
 }
 .lineup :nth-child(odd).frontline,

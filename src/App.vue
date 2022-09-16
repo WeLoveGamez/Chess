@@ -20,4 +20,10 @@ html:root {
 #container {
   padding: 8px;
 }
+.whitePiece {
+  color: white;
+}
+.BlackPiece {
+  color: black;
+}
 </style>

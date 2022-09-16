@@ -294,12 +294,6 @@ aside {
 .legal {
   background-color: aqua !important;
 }
-.whitePiece {
-  color: white;
-}
-.BlackPiece {
-  color: black;
-}
 
 main {
   display: flex;
