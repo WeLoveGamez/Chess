@@ -1,12 +1,19 @@
-export interface SkillTree {
-  name: string;
-  skills: Skill[];
-}
-interface Skill {
-  id: string;
-  lvl: number;
-}
+import { SkillTree } from "./types"
 
-// export const skillTree = {
 
-// }
+export const offenseTree:SkillTree = {
+  id:'test',
+  name:"offense",
+  skills:[
+    {
+      id:100,
+      lvl:1
+    }
+  ]
+}
+export const defenseTree = {
+    
+}
+export const utilityTree = {
+    
+}

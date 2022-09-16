@@ -194,8 +194,19 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
     [1, 1],
     [1, -1],
     [-1, 1],
-    [-1, -1],
+    [-1, -1]
   ];
+  offsets.push(
+    [2, 0],
+    [-2, 0],
+    [0, 2],
+    [0, -2],
+    [2, 2],
+    [2, -2],
+    [-2, 2],
+    [-2, -2]
+    )
+    
   for (const [rowOffset, cellOffset] of offsets) {
     if (board[fromRow + rowOffset]?.[fromCell + cellOffset]) {
       if (board[fromRow + rowOffset]?.[fromCell + cellOffset]?.player != player) legalMoves.push([fromRow + rowOffset, fromCell + cellOffset]);

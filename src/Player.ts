@@ -12,6 +12,7 @@ if (!player.value) {
       { name: 'King', value: 3.5, maxAmount: 1, amount: 1, amountPerRound: 1 },
     ],
     lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
+    skillTrees:[]
   };
 }
 export const maxValue = computed(() => {
