@@ -21,6 +21,7 @@ Object.defineProperty(Array.prototype, 'shuffle', {
 export function getPieceValue(piece: Tile['type']) {
   switch (piece) {
     default:
+      return 0;
     case 'Pawn':
       return 1;
     case 'Bishop':

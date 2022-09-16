@@ -10,25 +10,25 @@
       <Modal title="lineup" affirm-text="save" affirm-class="btn btn-success" :affirm-action="save">
         <div class="container">
           <div>
-            {{ `${usedValue} /${maxValue}` }}
+            {{ `used Value: ${usedValue} /${maxValue}` }}
           </div>
           <div class="d-flex">
-            <div v-for="unit of player.units" class="me-2" @click="selectedUnit = unit.name">
-              {{ `${unit.name}: ${availableNumber(unit)}` }}
+            <div v-for="unit of player.units.filter(e => availableNumber(e) > 0)" class="me-2 icons" @click="selectedUnit = unit.name">
+              {{ `${getUnicodePiece(unit.name)}: ${availableNumber(unit)}` }}
             </div>
           </div>
-          <div>
-            {{ selectedUnit || 'no selected unit' }}
+          <div :class="{ icons: getUnicodePiece(selectedUnit) }">
+            {{ `selected: ${getUnicodePiece(selectedUnit) || 'none'}` }}
           </div>
           <div class="lineup">
-            <div class="front row g-0">
-              <button v-for="index of boardSize.row" class="frontline col" @click="clickLineup('frontline', index - 1)">
-                {{ player.lineup.frontline[index - 1] }}
+            <div class="front d-flex">
+              <button v-for="index of boardSize.row" class="frontline" @click="clickLineup('frontline', index - 1)">
+                {{ getUnicodePiece(player.lineup.frontline[index - 1]) }}
               </button>
             </div>
-            <div class="back row g-0">
-              <button v-for="index of boardSize.row" class="backline col" @click="clickLineup('backline', index - 1)">
-                {{ player.lineup.backline[index - 1] }}
+            <div class="back d-flex">
+              <button v-for="index of boardSize.row" class="backline" @click="clickLineup('backline', index - 1)">
+                {{ getUnicodePiece(player.lineup.backline[index - 1]) }}
               </button>
             </div>
           </div>
@@ -117,7 +117,7 @@ import { player, boardSize, haveAllNeedUnits, maxValue, needExp } from '../Playe
 import { setPlayer } from '../API';
 import router from '../router';
 import * as type from '../types';
-import { autoPlay, createBoard } from '../board';
+import { autoPlay, createBoard, getUnicodePiece } from '../board';
 import { computed } from '@vue/reactivity';
 import { getPieceValue } from '../utils';
 
@@ -247,7 +247,20 @@ function getUnit(row: number, cell: number): type.UnitName | string {
 .backline {
   background-color: gray;
   border: 1px solid black;
-  min-height: 30px;
+  font-size: 5rem;
+
+  width: 20%;
+  aspect-ratio: 1 / 1;
+
+  @media (max-width: 1000px) {
+    font-size: 2.5rem;
+  }
+}
+.icons {
+  font-size: 3rem;
+  @media (max-width: 1000px) {
+    font-size: 1.5rem;
+  }
 }
 .lineup :nth-child(odd).frontline,
 .row:nth-child(odd) .cell:nth-child(even) {

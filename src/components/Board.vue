@@ -116,6 +116,7 @@ import {
   checkMate,
   legalMoves,
   autoPlay,
+  getUnicodePiece,
 } from '../board';
 
 const noSleep = new NoSleep();
@@ -244,19 +245,6 @@ function choosePromotionPiece(piece: Tile['type']) {
     botMove();
   }
 }
-
-const UNICODE_PIECES = {
-  King: 0x2654,
-  Queen: 0x2655,
-  Rook: 0x2656,
-  Bishop: 0x2657,
-  Knight: 0x2658,
-  Pawn: 0x2659,
-};
-function getUnicodePiece(string: Tile['type']) {
-  if (string == '') return '';
-  return String.fromCharCode(UNICODE_PIECES[string] + 6);
-}
 </script>
 <style lang="scss" scoped>
 $size: calc((95vw / v-bind('board.length')));
@@ -321,12 +309,6 @@ aside {
 }
 .legal {
   background-color: aqua !important;
-}
-.whitePiece {
-  color: white;
-}
-.BlackPiece {
-  color: black;
 }
 
 main {
