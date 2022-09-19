@@ -1,21 +1,19 @@
-
-
 export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
 
 export type UnitName = typeof PIECES[number] | '';
 
 export type Position = [number, number];
 export type Move = { piece: Position; target: Position };
-type Id =string;
+export type Id = string;
 
 export interface SkillTree {
-  id:Id;
+  id: Id;
   name: string;
   skills: Skill[];
 }
 interface Requirements {
-  usedPoints:number;
-  preSkills?: {id:Id,needLvl:number}[]
+  usedPoints: number;
+  preSkills?: { id: Id; needLvl: number }[];
 }
 export interface Skill {
   id: Id;
@@ -23,8 +21,8 @@ export interface Skill {
   req: Requirements;
 }
 
-interface PlayerSkillTrees{
-  activated:Id;
+interface PlayerSkillTrees {
+  activated: Id;
   trees: SkillTree[];
 }
 
@@ -34,7 +32,7 @@ export interface Player {
   lvl: number;
   units: Unit[];
   lineup: Lineup;
-  skillTrees:PlayerSkillTrees;
+  skillTrees: PlayerSkillTrees;
 }
 export interface DeadPiece {
   player: 1 | 2;
