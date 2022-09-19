@@ -1,6 +1,7 @@
 import { getPlayer } from './API';
 import { computed, ref } from 'vue';
 import type { Player } from './types';
+import { offenseTree } from './skillTree';
 export const player = ref(getPlayer());
 if (!player.value) {
   player.value = {
@@ -12,12 +13,11 @@ if (!player.value) {
       { name: 'King', value: 3.5, maxAmount: 1, amount: 1, amountPerRound: 1 },
     ],
     lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
-    skillTrees:[]
+    skillTrees:{activated:'test',trees:[offenseTree]}
   };
 }
-export const maxValue = computed(() => {
-  return player.value.lvl * 3 + 6;
-});
+export const usedTree = computed(()=> player.value.skillTrees.trees.find(t => player.value.skillTrees.activated == t.id))
+export const maxValue = computed(() => player.value.lvl * 3 + 6);
 export const haveAllNeedUnits = computed(() => {
   let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
   const lineUp = copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline);

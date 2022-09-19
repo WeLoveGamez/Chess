@@ -6,20 +6,26 @@ export type UnitName = typeof PIECES[number] | '';
 
 export type Position = [number, number];
 export type Move = { piece: Position; target: Position };
+type Id =string;
 
 export interface SkillTree {
-  id:string;
+  id:Id;
   name: string;
   skills: Skill[];
 }
+interface Requirements {
+  usedPoints:number;
+  preSkills?: {id:Id,needLvl:number}[]
+}
 export interface Skill {
-  id: number;
+  id: Id;
   lvl: number;
+  req: Requirements;
 }
 
-interface skillTrees{
-  activated:SkillTree;
-  
+interface PlayerSkillTrees{
+  activated:Id;
+  trees: SkillTree[];
 }
 
 export interface Player {
@@ -28,7 +34,7 @@ export interface Player {
   lvl: number;
   units: Unit[];
   lineup: Lineup;
-  skillTrees:SkillTree[];
+  skillTrees:PlayerSkillTrees;
 }
 export interface DeadPiece {
   player: 1 | 2;

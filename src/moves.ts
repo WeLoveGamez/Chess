@@ -1,5 +1,6 @@
 import type { Position, Tile } from './types';
 import { applyMove, moveHistory, King1Checked, King2Checked } from './board';
+import * as Player from './Player';
 
 export function checkChecks(player: 1 | 2, board: Tile[][]) {
   const checkingPieces: Position[] = [];
@@ -194,19 +195,15 @@ function checkLegalMovesKing(fromRow: number, fromCell: number, player: 1 | 2 | 
     [1, 1],
     [1, -1],
     [-1, 1],
-    [-1, -1]
+    [-1, -1],
   ];
-  offsets.push(
-    [2, 0],
-    [-2, 0],
-    [0, 2],
-    [0, -2],
-    [2, 2],
-    [2, -2],
-    [-2, 2],
-    [-2, -2]
-    )
-    
+  // TODO: FIXME: need better solution
+  if (player == 1) {
+    let tree = Player.usedTree.value;
+    if (tree?.id == 'test' && tree.skills.find(s => s.id == '100')?.lvl == 1) {
+      offsets.push([2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [2, -2], [-2, 2], [-2, -2]);
+    }
+  }
   for (const [rowOffset, cellOffset] of offsets) {
     if (board[fromRow + rowOffset]?.[fromCell + cellOffset]) {
       if (board[fromRow + rowOffset]?.[fromCell + cellOffset]?.player != player) legalMoves.push([fromRow + rowOffset, fromCell + cellOffset]);

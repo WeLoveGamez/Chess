@@ -6,8 +6,9 @@ export const offenseTree:SkillTree = {
   name:"offense",
   skills:[
     {
-      id:100,
-      lvl:1
+      id:'100',
+      lvl:1,
+      req:{usedPoints:0}
     }
   ]
 }
