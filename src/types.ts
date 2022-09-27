@@ -8,17 +8,16 @@ export type Id = string;
 
 export interface SkillTree {
   id: Id;
-  name: string;
-  skills: Skill[];
+  skills: {
+    [key: Id]: Skill
+  };
 }
 interface Requirements {
   usedPoints: number;
   preSkills?: { id: Id; needLvl: number }[];
 }
 export interface Skill {
-  id: Id;
   lvl: number;
-  req: Requirements;
 }
 
 interface PlayerSkillTrees {
@@ -39,11 +38,10 @@ export interface DeadPiece {
   name: UnitName;
 }
 export interface Unit {
-  name: UnitName;
+  id: Id
   amount: number;
   maxAmount: number;
   amountPerRound: number;
-  value: number;
 }
 export interface Lineup {
   frontline: UnitName[];

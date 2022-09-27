@@ -9,14 +9,14 @@ if (!player.value) {
     money: 0,
     lvl: 1,
     units: [
-      { name: 'Pawn', value: 1, maxAmount: 5, amount: 5, amountPerRound: 5 },
-      { name: 'King', value: 3.5, maxAmount: 1, amount: 1, amountPerRound: 1 },
+      { id: 'Pawn', maxAmount: 5, amount: 5, amountPerRound: 5 },
+      { id: 'King', maxAmount: 1, amount: 1, amountPerRound: 1 },
     ],
     lineup: { frontline: ['Pawn', 'Pawn', 'Pawn'], backline: ['Pawn', 'King', 'Pawn'] },
-    skillTrees:{activated:'test',trees:[offenseTree]}
+    skillTrees: { activated: 'test', trees: [offenseTree] }
   };
 }
-export const usedTree = computed(()=> player.value.skillTrees.trees.find(t => player.value.skillTrees.activated == t.id))
+export const usedTree = computed(() => player.value.skillTrees.trees.find(t => player.value.skillTrees.activated == t.id))
 export const maxValue = computed(() => player.value.lvl * 3 + 6);
 export const haveAllNeedUnits = computed(() => {
   let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
