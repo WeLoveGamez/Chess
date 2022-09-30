@@ -13,8 +13,8 @@
             {{ `used Value: ${usedValue} /${maxValue}` }}
           </div>
           <div class="d-flex">
-            <div v-for="unit of player.units.filter(e => availableNumber(e) > 0)" class="me-2 icons" @click="selectedUnit = unit.name">
-              {{ `${getUnicodePiece(unit.name)}: ${availableNumber(unit)}` }}
+            <div v-for="unit of player.units.filter(e => availableNumber(e) > 0)" class="me-2 icons" @click="selectedUnit = unit.id">
+              {{ `${getUnicodePiece(unit.id)}: ${availableNumber(unit)}` }}
             </div>
           </div>
           <div :class="{ icons: getUnicodePiece(selectedUnit) }">
@@ -62,16 +62,16 @@
         <div class="cell" v-for="cell of 5">
           <Modal :title="getUnit(row, cell)">
             <div class="container" v-if="getUnit(row, cell) != 'coming soon' && !getUnit(row, cell).includes('lvl') && getUnit(row, cell) != 'King'">
-              <div class="text-center">{{ `max amount: ${player.units.find(e => e.name == getUnit(row, cell))?.maxAmount}` }}</div>
+              <div class="text-center">{{ `max amount: ${player.units.find(e => e.id == getUnit(row, cell))?.maxAmount}` }}</div>
               <div>
-                <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitName)">
+                <Button @click="buyMaxAmount(getUnit(row, cell) as type.UnitId)">
                   <div>increase</div>
                   <div>{{ displayMaxAmountCost(row, cell) }}</div>
                 </Button>
               </div>
-              <div class="text-center">{{ `new units per round: ${player.units.find(e => e.name == getUnit(row, cell))?.amountPerRound}` }}</div>
+              <div class="text-center">{{ `new units per round: ${player.units.find(e => e.id == getUnit(row, cell))?.amountPerRound}` }}</div>
               <div>
-                <Button @click="buyAmountPerRound(getUnit(row, cell) as type.UnitName)">
+                <Button @click="buyAmountPerRound(getUnit(row, cell) as type.UnitId)">
                   <div>increase</div>
                   <div>
                     {{ displayamountPerRoundCost(row, cell) }}
@@ -80,13 +80,13 @@
               </div>
               <div class="text-center">
                 {{
-                  `amount (${player.units.find(e => e.name == getUnit(row, cell))?.amount} / ${
-                    player.units.find(e => e.name == getUnit(row, cell))?.maxAmount
+                  `amount (${player.units.find(e => e.id == getUnit(row, cell))?.amount} / ${
+                    player.units.find(e => e.id == getUnit(row, cell))?.maxAmount
                   })`
                 }}
               </div>
               <div>
-                <Button @click="buyUnit(getUnit(row, cell) as type.UnitName)">
+                <Button @click="buyUnit(getUnit(row, cell)as type.UnitId)">
                   <div>buy</div>
                   <div>{{ displayBuyCost(row, cell) }}</div>
                 </Button>
@@ -121,7 +121,7 @@ import { autoPlay, createBoard, getUnicodePiece } from '../board';
 import { computed } from '@vue/reactivity';
 import { getPieceValue } from '../utils';
 
-const selectedUnit = ref<type.UnitName>('');
+const selectedUnit = ref<type.UnitId>('');
 function save() {
   if (player.value.lineup.frontline.concat(player.value.lineup.backline).includes('King')) setPlayer(player.value);
 }
@@ -134,8 +134,8 @@ function play() {
 
 function availableNumber(unit: type.Unit) {
   let i = 0;
-  for (let name of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
-    if (name == unit.name) i++;
+  for (let id of player.value.lineup.frontline.concat(player.value.lineup.backline)) {
+    if (id == unit.id) i++;
   }
   return unit.amount - i;
 }
@@ -150,44 +150,44 @@ function calcCost(value: number, multiplicator: number) {
   return value * Math.round((multiplicator + 1) ** 1.5);
 }
 function displayMaxAmountCost(row: number, cell: number) {
-  const name = getUnit(row, cell) as type.UnitName;
-  const maxAmount = player.value.units.find(e => e.name == name)?.maxAmount;
-  if (typeof maxAmount == 'number') return `costs: ${calcCost(getPieceValue(name), maxAmount)}`;
+  const id = getUnit(row, cell) as type.UnitId;
+  const maxAmount = player.value.units.find(e => e.id == id)?.maxAmount;
+  if (typeof maxAmount == 'number') return `costs: ${calcCost(getPieceValue(id), maxAmount)}`;
 }
 function displayamountPerRoundCost(row: number, cell: number) {
-  const name = getUnit(row, cell) as type.UnitName;
-  const amountPerRound = player.value.units.find(e => e.name == name)?.amountPerRound;
-  if (typeof amountPerRound == 'number') return `costs: ${calcCost(getPieceValue(name), amountPerRound)}`;
+  const id = getUnit(row, cell) as type.UnitId;
+  const amountPerRound = player.value.units.find(e => e.id == id)?.amountPerRound;
+  if (typeof amountPerRound == 'number') return `costs: ${calcCost(getPieceValue(id), amountPerRound)}`;
 }
 function displayBuyCost(row: number, cell: number) {
-  const name = getUnit(row, cell) as type.UnitName;
-  return `costs: ${getPieceValue(name)}`;
+  const id = getUnit(row, cell) as type.UnitId;
+  return `costs: ${getPieceValue(id)}`;
 }
-function buyMaxAmount(name: type.UnitName) {
-  const unit = player.value.units.find(e => e.name == name);
+function buyMaxAmount(id: type.UnitId) {
+  const unit = player.value.units.find(e => e.id == id);
   if (!unit || unit?.maxAmount >= 100) return;
-  const cost = calcCost(getPieceValue(name), unit?.maxAmount);
+  const cost = calcCost(getPieceValue(id), unit?.maxAmount);
   if (cost <= player.value.money) {
     player.value.money -= cost;
     unit.maxAmount++;
     setPlayer(player.value);
   }
 }
-function buyAmountPerRound(name: type.UnitName) {
-  const unit = player.value.units.find(e => e.name == name);
+function buyAmountPerRound(id: type.UnitId) {
+  const unit = player.value.units.find(e => e.id == id);
   if (!unit || unit?.amountPerRound >= unit.maxAmount) return;
-  const cost = calcCost(getPieceValue(name), unit?.amountPerRound);
+  const cost = calcCost(getPieceValue(id), unit?.amountPerRound);
   if (cost <= player.value.money) {
     player.value.money -= cost;
     unit.amountPerRound++;
     setPlayer(player.value);
   }
 }
-function buyUnit(name: type.UnitName) {
-  const unit = player.value.units.find(e => e.name == name);
+function buyUnit(id: type.UnitId) {
+  const unit = player.value.units.find(e => e.id == id);
   if (!unit || unit?.amount >= unit.maxAmount) return;
-  if (getPieceValue(name) <= player.value.money) {
-    player.value.money -= getPieceValue(name);
+  if (getPieceValue(id) <= player.value.money) {
+    player.value.money -= getPieceValue(id);
     unit.amount++;
     setPlayer(player.value);
   }
@@ -197,7 +197,7 @@ function removeFromLineup(line: 'frontline' | 'backline', index: number) {
 }
 function addToLineup(line: 'frontline' | 'backline', index: number) {
   if (usedValue.value + getPieceValue(selectedUnit.value) > maxValue.value) return;
-  if (player.value.units.find(e => e.name == selectedUnit.value)!.amount <= 0) return;
+  if (player.value.units.find(e => e.id == selectedUnit.value)!.amount <= 0) return;
   player.value.lineup[line][index] = selectedUnit.value;
   selectedUnit.value = '';
 }
@@ -209,7 +209,7 @@ const usedValue = computed(() => {
   return used;
 });
 
-function getUnit(row: number, cell: number): type.UnitName | string {
+function getUnit(row: number, cell: number): type.UnitId | string {
   if (row == 1 && cell == 1) return 'King';
   if (row == 1 && cell == 2) return 'Pawn';
   if (row == 1 && cell == 3) return player.value.lvl >= 2 ? 'Bishop' : 'lvl 2';

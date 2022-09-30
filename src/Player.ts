@@ -21,10 +21,10 @@ export const maxValue = computed(() => player.value.lvl * 3 + 6);
 export const haveAllNeedUnits = computed(() => {
   let copyPlayer: Player = JSON.parse(JSON.stringify(player.value));
   const lineUp = copyPlayer.lineup.frontline.concat(copyPlayer.lineup.backline);
-  for (let name of lineUp.filter(e => e)) {
-    copyPlayer.units.find(e => e.name == name)!.amount--;
+  for (let id of lineUp.filter(e => e)) {
+    copyPlayer.units.find(e => e.id == id)!.amount--;
   }
-  return !copyPlayer.units.some(e => e.amount < 0 && lineUp.includes(e.name));
+  return !copyPlayer.units.some(e => e.amount < 0 && lineUp.includes(e.id));
 });
 export const boardSize = computed(() => {
   const boardSize = {
@@ -73,20 +73,20 @@ export function lvlUp() {
   player.value.exp -= needExp.value;
   player.value.lvl++;
   if (player.value.lvl >= 2) {
-    if (!player.value.units.find(e => e.name == 'Bishop'))
-      player.value.units.push({ name: 'Bishop', value: 3, maxAmount: 0, amount: 0, amountPerRound: 0 });
+    if (!player.value.units.find(e => e.id == 'Bishop'))
+      player.value.units.push({ id: 'Bishop', maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
   if (player.value.lvl >= 5) {
-    if (!player.value.units.find(e => e.name == 'Knight'))
-      player.value.units.push({ name: 'Knight', value: 3, maxAmount: 0, amount: 0, amountPerRound: 0 });
+    if (!player.value.units.find(e => e.id == 'Knight'))
+      player.value.units.push({ id: 'Knight', maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
   if (player.value.lvl >= 9) {
-    if (!player.value.units.find(e => e.name == 'Rook'))
-      player.value.units.push({ name: 'Rook', value: 5, maxAmount: 0, amount: 0, amountPerRound: 0 });
+    if (!player.value.units.find(e => e.id == 'Rook'))
+      player.value.units.push({ id: 'Rook', maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
   if (player.value.lvl >= 14) {
-    if (!player.value.units.find(e => e.name == 'Queen'))
-      player.value.units.push({ name: 'Queen', value: 9, maxAmount: 0, amount: 0, amountPerRound: 0 });
+    if (!player.value.units.find(e => e.id == 'Queen'))
+      player.value.units.push({ id: 'Queen', maxAmount: 0, amount: 0, amountPerRound: 0 });
   }
 }
 export const needExp = computed(() => {

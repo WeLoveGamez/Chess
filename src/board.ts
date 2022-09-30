@@ -1,6 +1,6 @@
 import { computed, Ref, ref } from 'vue';
 import { checkAllLegalMoves, checkChecks, checkLegalMoves } from './moves';
-import type { Position, DeadPiece, UnitName, Tile } from './types';
+import type { Position, DeadPiece, Tile, Id, UnitId } from './types';
 import { player, boardSize, maxValue } from './Player';
 import { getPieceValue } from './utils';
 import { botPlayer } from './bot';
@@ -18,10 +18,10 @@ export const openPromotePawnSelect = computed(() => {
     for (let [cellIndex, cell] of Object.entries(row)) {
       if (
         cell.type == 'Pawn' &&
-        ((+rowIndex == 0 && cell.player == 2 && player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').length > 0) ||
+        ((+rowIndex == 0 && cell.player == 2 && player.value.units.filter(p => p.id != 'King' && p.id != 'Pawn').length > 0) ||
           (+rowIndex == board.value.length - 1 &&
             cell.player == 1 &&
-            player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0).length > 0))
+            player.value.units.filter(p => p.id != 'King' && p.id != 'Pawn' && p.amount > 0).length > 0))
       )
         return [+rowIndex, +cellIndex];
     }
@@ -32,12 +32,12 @@ export const checkMate = computed(() =>
   King2Checked.value.length > 0 && AllLegalMoves.value.length == 0
     ? 'checkmate for white'
     : King1Checked.value.length > 0 && AllLegalMoves.value.length == 0
-    ? 'checkmate for black'
-    : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
-      piecesOnBoard.value == 2 ||
-      stalemateCheck.value > 10
-    ? 'stalemate'
-    : ''
+      ? 'checkmate for black'
+      : (King1Checked.value.length == 0 && King2Checked.value.length == 0 && AllLegalMoves.value.length == 0 && !openPromotePawnSelect.value) ||
+        piecesOnBoard.value == 2 ||
+        stalemateCheck.value > 10
+        ? 'stalemate'
+        : ''
 );
 
 export const moveHistory = ref<{ from: Position; to: Position; piece: Tile['type'] }[]>([]);
@@ -52,7 +52,7 @@ export function getTile(position: Position) {
   console.trace(position);
   return board.value[position[0]][position[1]];
 }
-export function getPieceType(position: Position): UnitName {
+export function getPieceType(position: Position): UnitId {
   return getTile(position).type;
 }
 export function getTilePlayer(position: Position): 0 | 1 | 2 {
@@ -80,12 +80,12 @@ export function createBoard() {
     backline.push({ type: '', player: 0 });
   }
   let enemyValue = 4;
-  let enemyUnits: UnitName[] = ['King'];
-  const possibleUnits = player.value.units.filter(e => e.name != 'King');
+  let enemyUnits: UnitId[] = ['King'];
+  const possibleUnits = player.value.units.filter(e => e.id != 'King');
 
   for (let i = 1; i < frontline.length * 2; i++) {
     if (enemyValue <= maxValue.value) {
-      enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].name;
+      enemyUnits[i] = possibleUnits[Math.floor(Math.random() * possibleUnits.length)].id;
       enemyValue += getPieceValue(enemyUnits[i]);
     } else {
       if (maxValue.value - enemyValue >= 2) {
@@ -168,7 +168,7 @@ export function applyMove(
       const player = board[toRow][toCell].player;
       stalemateCheck.value++;
       if (player) {
-        deadPieces.value.push({ name: board[toRow][toCell].type, player: player });
+        deadPieces.value.push({ id: board[toRow][toCell].type, player: player });
         stalemateCheck.value = 0;
       }
       moveHistory?.value.push({ from: [fromRow, fromCell], to: [toRow, toCell], piece: board[fromRow][fromCell].type });

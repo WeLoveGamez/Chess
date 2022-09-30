@@ -27,10 +27,10 @@
     <div
       class="promotions mt-2"
       v-if="openPromotePawnSelect"
-      @click.stop="choosePromotionPiece(piece.name)"
-      v-for="piece of player.units.filter(p => p.name != 'King' && p.name != 'Pawn' && p.amount > 0)"
+      @click.stop="choosePromotionPiece(piece.id)"
+      v-for="piece of player.units.filter(p => p.id != 'King' && p.id != 'Pawn' && p.amount > 0)"
     >
-      {{ getUnicodePiece(piece.name) }}
+      {{ getUnicodePiece(piece.id) }}
     </div>
     <aside>
       <div>Player: {{ playerTurn == 1 ? 'White' : 'Black' }}</div>
@@ -127,7 +127,7 @@ const activeGame = ref(false);
 const rewards = ref({ money: 0, exp: 0 });
 function calcAfterGame() {
   for (let piece of deadPieces.value.filter(e => e.player == 2)) {
-    rewards.value.money += getPieceValue(piece.name);
+    rewards.value.money += getPieceValue(piece.id);
   }
   for (let piece of board.value.flatMap(p => p.filter(e => e.type)).filter(e => e.player == 1)) {
     rewards.value.exp += getPieceValue(piece.type);
@@ -149,7 +149,7 @@ function calcAfterGame() {
   player.value.money += rewards.value.money;
 
   for (let piece of deadPieces.value.filter(e => e.player == 1)) {
-    const unit = player.value.units.find(e => e.name == piece.name);
+    const unit = player.value.units.find(e => e.id == piece.id);
     if (unit) unit.amount--;
   }
   for (let piece of player.value.units) {
@@ -230,7 +230,7 @@ function botMove() {
     moveHistory
   );
   if (openPromotePawnSelect.value) {
-    choosePromotionPiece(player.value.units.filter(p => p.name != 'King' && p.name != 'Pawn').sort((a, b) => b.value - a.value)[0].name);
+    choosePromotionPiece(player.value.units.filter(p => p.id != 'King' && p.id != 'Pawn').sort((a, b) => getPieceValue(b.id)- getPieceValue(a.id))[0].id);
   }
   if (bot.value) {
     botPlayer.value = botPlayer.value == 1 ? 2 : 1;

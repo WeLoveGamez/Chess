@@ -1,6 +1,6 @@
 export const PIECES = ['Rook', 'Knight', 'Bishop', 'Queen', 'King', 'Pawn'] as const;
 
-export type UnitName = typeof PIECES[number] | '';
+export type UnitId = typeof PIECES[number] | '';
 
 export type Position = [number, number];
 export type Move = { piece: Position; target: Position };
@@ -35,20 +35,20 @@ export interface Player {
 }
 export interface DeadPiece {
   player: 1 | 2;
-  name: UnitName;
+  id: UnitId;
 }
 export interface Unit {
-  id: Id
+  id: UnitId
   amount: number;
   maxAmount: number;
   amountPerRound: number;
 }
 export interface Lineup {
-  frontline: UnitName[];
-  backline: UnitName[];
+  frontline: UnitId[];
+  backline: UnitId[];
 }
 
 export interface Tile {
-  type: UnitName | '';
+  type: UnitId | '';
   player: 1 | 2 | 0;
 }
